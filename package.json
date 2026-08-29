@@ -1,0 +1,10 @@
+{
+  "name": "hair-recipe",
+  "version": "1.0.0",
+  "private": true,
+  "description": "HAIR Recipe - チャット型ヘアスタイル診断アプリ（プロトタイプ）",
+  "type": "module",
+  "scripts": {
+    "dev": "vercel dev"
+  }
+}

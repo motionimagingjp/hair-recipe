@@ -1,0 +1,128 @@
+[
+  {
+    "id": "m-s1",
+    "gender": "men",
+    "length": "short",
+    "name": "ベリーショート ジェットモヒカン",
+    "sub": "刈り上げ×スパイキートップで清潔感MAX"
+  },
+  {
+    "id": "m-s2",
+    "gender": "men",
+    "length": "short",
+    "name": "ナチュラルマッシュショート",
+    "sub": "丸みのある無造作シルエット"
+  },
+  {
+    "id": "m-s3",
+    "gender": "men",
+    "length": "short",
+    "name": "ショート ツーブロック アップバング",
+    "sub": "束感トップ×刈り上げでスタイリッシュ"
+  },
+  {
+    "id": "m-m1",
+    "gender": "men",
+    "length": "mid",
+    "name": "ミディアム コンマヘア",
+    "sub": "束感カール×抜け感前髪"
+  },
+  {
+    "id": "m-m2",
+    "gender": "men",
+    "length": "mid",
+    "name": "ミディアム センターパート",
+    "sub": "知的印象×分け目キープ"
+  },
+  {
+    "id": "m-m3",
+    "gender": "men",
+    "length": "mid",
+    "name": "ニュアンスパーマウルフ",
+    "sub": "無造作パーマで抜け感のあるウルフ"
+  },
+  {
+    "id": "m-l1",
+    "gender": "men",
+    "length": "long",
+    "name": "ロングナチュラルウェーブ",
+    "sub": "柔らかい質感の自然な波巻き"
+  },
+  {
+    "id": "m-l2",
+    "gender": "men",
+    "length": "long",
+    "name": "リファインド マンバンスタイル",
+    "sub": "まとめ髪で洗練された大人の色気"
+  },
+  {
+    "id": "m-l3",
+    "gender": "men",
+    "length": "long",
+    "name": "ロングストレートセンターパート",
+    "sub": "艶感重視のセンターパート"
+  },
+  {
+    "id": "w-s1",
+    "gender": "women",
+    "length": "short",
+    "name": "ハンサムショートスタイル",
+    "sub": "小顔×クールな印象の前上がりショート"
+  },
+  {
+    "id": "w-s2",
+    "gender": "women",
+    "length": "short",
+    "name": "切りっぱなしタッセルボブ",
+    "sub": "重めバングで今っぽい丸みシルエット"
+  },
+  {
+    "id": "w-s3",
+    "gender": "women",
+    "length": "short",
+    "name": "大人可愛い丸みショートボブ",
+    "sub": "柔らかい丸みシルエットで愛され感"
+  },
+  {
+    "id": "w-m1",
+    "gender": "women",
+    "length": "mid",
+    "name": "韓国風くびれセミディ",
+    "sub": "毛先くびれで華やかな今どき韓国風"
+  },
+  {
+    "id": "w-m2",
+    "gender": "women",
+    "length": "mid",
+    "name": "くびれレイヤーミディ",
+    "sub": "レイヤーで軽さと女性らしさを両立"
+  },
+  {
+    "id": "w-m3",
+    "gender": "women",
+    "length": "mid",
+    "name": "ナチュラルストレートミディ",
+    "sub": "艶感重視の清潔感あるストレート"
+  },
+  {
+    "id": "w-l1",
+    "gender": "women",
+    "length": "long",
+    "name": "こなれシースルーウェーブ",
+    "sub": "抜け感前髪×柔らかい波巻き"
+  },
+  {
+    "id": "w-l2",
+    "gender": "women",
+    "length": "long",
+    "name": "サラツヤストレートロング",
+    "sub": "清潔感と艶感を最優先したストレート"
+  },
+  {
+    "id": "w-l3",
+    "gender": "women",
+    "length": "long",
+    "name": "韓国風ヨシンモリ",
+    "sub": "華やかな巻き髪でデート映え"
+  }
+]
