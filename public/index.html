@@ -1306,6 +1306,16 @@
       b.addEventListener("click", function(){
         if(state.gender === g) return;
         state.gender = g;
+        // 対象（メンズ/レディース）を切り替えたら、これまでの会話・選択結果はリセットして
+        // 新しい性別の診断フローを最初からやり直せるようにする
+        state.chat = { started:false, log:[] };
+        state.faceShape = null;
+        state.selectedStyle = null;
+        state.diagnosis = { texture:null, crown:null, curl:null };
+        state.outfit = null;
+        state.seenFashionBadge = false;
+        state.seenRestaurantBadge = false;
+        state.seenOrderBadge = false;
         saveState();
         render();
       });
