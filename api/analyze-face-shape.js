@@ -36,8 +36,11 @@ export default async function handler(req, res) {
       "必ず次のJSON形式のみで回答してください（説明文やコードブロックは不要）:\n" +
       '{"faceShape": "候補のid", "confidence": 0から1の数値}';
 
+    // gemini-flash-latest は Google 側が常に「その時点で推奨されるFlashモデル」を指すように
+    // 自動で切り替えてくれるエイリアス。個別バージョン名（例: gemini-2.0-flash）を指定すると
+    // 将来そのモデルが廃止された際に404エラーになるため、ここではあえて固定しない。
     const geminiRes = await fetch(
-      "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=" +
+      "https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=" +
         apiKey,
       {
         method: "POST",
