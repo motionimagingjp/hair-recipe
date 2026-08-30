@@ -522,7 +522,9 @@
     background:var(--tab-accent, var(--accent-hair)); color:#fff;
     display:flex;align-items:center;justify-content:center;
     font-family:var(--font-display); font-size:22px; font-weight:700;
+    overflow:hidden;
   }
+  .about-avatar img{width:100%;height:100%;object-fit:cover;display:block;}
   .about-name{font-weight:700; font-size:14.5px;}
   .about-tagline{font-size:12px; color:var(--ink-soft); margin-top:3px; line-height:1.6;}
   .sns-row{display:flex; gap:10px; margin-top:2px;}
@@ -1312,11 +1314,7 @@
       actions.style.paddingLeft = "0";
       var b1 = el("button","chip primary","この髪型でオーダーシートを作る");
       b1.addEventListener("click", function(){ goToOrder(style); });
-      var b2 = el("button","chip","この髪型に合う服を見る");
-      b2.addEventListener("click", function(){ goToFashion(style); });
-      var b3 = el("button","chip","初デートのお店を探す");
-      b3.addEventListener("click", function(){ goToRestaurant(style); });
-      actions.appendChild(b1); actions.appendChild(b2); actions.appendChild(b3);
+      actions.appendChild(b1);
       confirmWrap.appendChild(actions);
       return confirmWrap;
     }
@@ -1429,8 +1427,6 @@
   }
 
   function goToOrder(style){ state.tab="order"; state.seenOrderBadge = true; saveState(); render(); }
-  function goToFashion(style){ state.tab="fashion"; state.seenFashionBadge = true; saveState(); render(); }
-  function goToRestaurant(style){ state.tab="restaurant"; state.seenRestaurantBadge = true; saveState(); render(); }
 
   // スクリーンショット送信
   byId("fileScreenshot").addEventListener("change", function(e){
@@ -1648,20 +1644,6 @@
     promptNote.textContent = "※生成AIツールへの写真アップロードは、各サービスの利用規約に従ってください。生成結果の品質は保証されません。";
     screen.appendChild(promptNote);
 
-    // ---- サブエリア：コーデ ----
-    screen.appendChild(el("div","section-label","おすすめコーデ例"));
-    if(state.outfit){
-      screen.appendChild(el("div","advice-box", "「"+state.outfit+"」を選択中です。"));
-    }else{
-      var goFashion = el("button","mini-btn","ファッション相談へ");
-      goFashion.addEventListener("click", function(){ state.tab="fashion"; render(); });
-      var noOutfit = el("div","empty-state");
-      noOutfit.style.padding = "10px 4px";
-      noOutfit.innerHTML = '<p style="margin:0 0 8px;">まだコーデが選択されていません。</p>';
-      noOutfit.appendChild(goFashion);
-      screen.appendChild(noOutfit);
-    }
-
     // ---- サブエリア：デートスポットメモ ----
     screen.appendChild(el("div","section-label","予約・検討中のデートスポットメモ"));
     if(state.dateCandidates.length){
@@ -1728,8 +1710,9 @@
   ========================================================= */
   var APP_ABOUT = {
     avatarInitial: "J",
-    name: "ジェイク（個人開発）",
+    avatarImage: "profile-avatar.jpg",
     // 🔧 差し替えポイント: 実際のお名前・写真に置き換えてください
+    name: "ジェイク（個人開発）",
     tagline: "婚活中の一人でも多くの方の「似合う」を後押ししたくて作りました。",
     story: "婚活の現場を見てきた中で、中身は素敵なのに髪型で第一印象を損している方を何人も見てきました。美容師さんに相談する前の「予習」として、気軽に使ってもらえたらと思い、個人でこのアプリを開発しています。",
     dataNote: "アップロードされた写真は解析のために外部のAIサービスへ一時的に送信され、当方のサーバーには保存されません。",
@@ -1746,8 +1729,11 @@
     screen.appendChild(closeBtn);
 
     var head = el("div","about-header");
+    var avatarHtml = APP_ABOUT.avatarImage
+      ? '<img src="'+APP_ABOUT.avatarImage+'" alt="'+APP_ABOUT.name+'">'
+      : APP_ABOUT.avatarInitial;
     head.innerHTML =
-      '<div class="about-avatar">'+APP_ABOUT.avatarInitial+'</div>'+
+      '<div class="about-avatar">'+avatarHtml+'</div>'+
       '<div><div class="about-name">'+APP_ABOUT.name+'</div><div class="about-tagline">'+APP_ABOUT.tagline+'</div></div>';
     screen.appendChild(head);
 
