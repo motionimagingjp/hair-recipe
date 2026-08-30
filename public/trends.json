@@ -1,0 +1,54 @@
+{
+  "_schema": {
+    "id": "一意のID（tags選択やbuildExternalPrompt()への差し込みキーとして使用）",
+    "label": "チップに表示する短いラベル",
+    "gender": "ladies | mens | all",
+    "summary": "1〜2文の短い説明（画像なし・記事の要約テキストのみ）",
+    "tags": "検索・マッチング用キーワード配列",
+    "suggestedFaceShapes": "相性の良い顔型ID配列（美容師監修前は空でOK）",
+    "sourceNote": "参照した業界メディア名（画像・本文の転載はしない、出典明記のみ）",
+    "updatedAt": "YYYY-MM-DD（更新運用の目安：月1回程度）"
+  },
+  "trends": [
+    {
+      "id": "korean-kubire-semi",
+      "label": "韓国風くびれセミロング",
+      "gender": "ladies",
+      "summary": "顔まわりとえり足にくびれを作る、韓国風の抜け感スタイル。2026年秋冬も継続して人気。",
+      "tags": ["korean", "semi-long", "kubire", "抜け感"],
+      "suggestedFaceShapes": [],
+      "sourceNote": "across hair design / ホットペッパービューティー",
+      "updatedAt": "2026-08-30"
+    },
+    {
+      "id": "see-through-bangs",
+      "label": "シースルーバング",
+      "gender": "ladies",
+      "summary": "薄めで軽さのある前髪で抜け感を演出する前髪スタイル。幅広い顔型に合わせやすい定番トレンド。",
+      "tags": ["bangs", "see-through", "前髪", "韓国風"],
+      "suggestedFaceShapes": [],
+      "sourceNote": "美的.com",
+      "updatedAt": "2026-08-30"
+    },
+    {
+      "id": "deep-transparent-color",
+      "label": "深みカラー（透明感暗髪）",
+      "gender": "ladies",
+      "summary": "暗髪でも重く見えない、透明感のあるトーンのカラー。2026年秋冬の主役カラーとして紹介されている。",
+      "tags": ["color", "暗髪", "透明感"],
+      "suggestedFaceShapes": [],
+      "sourceNote": "across hair design",
+      "updatedAt": "2026-08-30"
+    },
+    {
+      "id": "clean-matte-short",
+      "label": "清潔感マットショート",
+      "gender": "mens",
+      "summary": "サイドをすっきりまとめつつトップに動きを出す、ビジネスにも馴染む好印象ショート。2026年秋冬のメンズ定番。",
+      "tags": ["mens", "short", "clean", "matte", "ビジネス"],
+      "suggestedFaceShapes": [],
+      "sourceNote": "across hair design",
+      "updatedAt": "2026-08-30"
+    }
+  ]
+}
