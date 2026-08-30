@@ -361,88 +361,10 @@
     box-shadow:0 2px 6px rgba(0,0,0,.25);
   }
 
-  /* ---------- Web検索補完（ハイブリッド画像提示） ---------- */
-  .web-search-row{
+  /* ---------- カタログ内アップロード導線（Web検索機能は権利面の懸念により廃止） ---------- */
+  .upload-hint-row{
     padding-left:34px;
-    display:flex; flex-direction:column; gap:6px;
     margin-top:2px;
-  }
-  .web-search-input{
-    font-family:var(--font-body);
-    font-size:12px;
-    padding:8px 10px;
-    border-radius:10px;
-    border:1px solid var(--line);
-    background:var(--surface);
-    color:var(--ink);
-    outline:none;
-  }
-  .web-search-input:focus{border-color:var(--tab-accent, var(--accent-hair));}
-  .web-search-btn{align-self:flex-start;}
-
-  .web-modal-overlay{
-    position:absolute; inset:0; z-index:80;
-    background:rgba(0,0,0,.45);
-    display:flex; align-items:flex-end; justify-content:center;
-  }
-  .web-modal{
-    width:100%;
-    max-height:78%;
-    overflow-y:auto;
-    background:var(--bg);
-    border-radius:20px 20px 0 0;
-    padding:14px 16px 22px;
-    box-shadow:0 -12px 30px rgba(0,0,0,.3);
-  }
-  .web-modal-head{display:flex; align-items:center; justify-content:space-between; margin-bottom:6px;}
-  .web-modal-title{font-size:14px; font-weight:700; color:var(--ink); font-family:var(--font-display);}
-  .web-modal-close{
-    background:none; border:none; font-size:16px; color:var(--ink-faint);
-    cursor:pointer; padding:4px 8px; line-height:1;
-  }
-  .web-modal-query{
-    font-size:10.5px; color:var(--ink-faint); line-height:1.5;
-    background:var(--surface-2); padding:7px 9px; border-radius:9px;
-    margin-bottom:10px; word-break:break-all;
-  }
-  .web-modal-loading-text{
-    font-size:11.5px; color:var(--ink-faint); text-align:center; margin:4px 0 10px;
-  }
-  .web-result-grid{
-    display:grid; grid-template-columns:repeat(3,1fr); gap:8px;
-  }
-  .web-result-card{
-    background:var(--surface); border:1px solid var(--line); border-radius:10px;
-    overflow:hidden; cursor:pointer; padding:0; text-align:left;
-    transition:transform .12s ease, border-color .12s ease;
-  }
-  .web-result-card:hover{transform:translateY(-2px); border-color:var(--tab-accent, var(--accent-hair));}
-  .web-result-thumb{
-    aspect-ratio:1/1; display:flex; align-items:center; justify-content:center;
-  }
-  .web-result-thumb svg{width:48%; height:60%;}
-  .web-result-source{
-    font-size:8px; color:var(--ink-faint); padding:4px 5px 5px;
-    border-top:1px solid var(--line); line-height:1.35;
-    white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
-  }
-  .web-result-source a{color:var(--ink-faint); text-decoration:underline;}
-  .web-skeleton{
-    aspect-ratio:1/1; border-radius:10px;
-    background:linear-gradient(90deg, var(--surface-2) 25%, var(--surface) 42%, var(--surface-2) 63%);
-    background-size:200% 100%;
-    animation:web-shimmer 1.3s ease-in-out infinite;
-  }
-  @keyframes web-shimmer{
-    0%{background-position:200% 0;}
-    100%{background-position:-200% 0;}
-  }
-  .web-source-note{
-    font-size:10px; color:var(--ink-faint); padding:4px 9px 0; line-height:1.5;
-  }
-  .web-source-note a{color:var(--ink-faint);}
-  .web-empty-note{
-    font-size:11.5px; color:var(--ink-faint); text-align:center; margin:8px 0;
   }
   .style-card:hover{transform:translateY(-2px); box-shadow:0 10px 20px -14px rgba(0,0,0,.35); border-color:var(--tab-accent);}
   .style-card .duo{
@@ -1000,12 +922,6 @@
     );
   }
 
-  // Web検索結果から選んだスタイルには、出典（参考元ドメイン）を明記する
-  function styleSourceNote(style){
-    if(!style || style.source !== "web") return "";
-    return '<div class="web-source-note">出典：'+style.sourceDomain+'（参考Webイメージ・アプリ内でのみ表示）</div>';
-  }
-
   /* =========================================================
      3. 🔧 実API連携ポイント（プレースホルダー実装）
      -----------------------------------------------------------
@@ -1085,120 +1001,6 @@
   function buildExternalPrompt(style){
     return "添付した人物写真の髪型だけを「" + style.name + "」（" + style.sub + "）に変更してください。"
       + "顔立ち・肌の色・背景はそのまま保持し、正面から見た写真と横顔（サイド）から見た写真の2枚を生成してください。";
-  }
-
-  // 🌐 Webハイブリッド画像検索: 本番では Google Custom Search API / Unsplash API 等を
-  // ノイズ除外キーワード付きクエリで呼び出し、実画像URL・出典URL・出典ドメインを取得する。
-  // ここではモックとして、プレースホルダーの検索結果（色つきシルエット＋架空の出典表記）を返す。
-  // 実装時の置き換えポイント: この関数の中身だけを差し替えれば、UI・モーダル側はそのまま使える。
-  var WEB_MOCK_DOMAINS = [
-    "example-hair-gallery.com", "example-salon-catalog.jp", "example-style-mag.net",
-    "example-beauty-cut.jp", "example-hair-trend.com", "example-cut-book.jp",
-    "example-style-diary.jp", "example-hair-lookbook.com"
-  ];
-  async function searchWebImages(query){
-    await sleep(1300);
-    var count = 6 + Math.floor(Math.random()*3); // 6〜8件
-    var results = [];
-    for(var i=0;i<count;i++){
-      results.push({
-        id: "web-mock-" + Date.now() + "-" + i,
-        hue: Math.floor(Math.random()*360),
-        domain: WEB_MOCK_DOMAINS[Math.floor(Math.random()*WEB_MOCK_DOMAINS.length)],
-        url: "https://example.com/hair-style-" + (i+1)
-      });
-    }
-    return { query: query, results: results, mock:true };
-  }
-
-  // 検索クエリ自動生成（性別・長さ・顔型・任意キーワードからノイズ除外語つきの検索文字列を組み立てる）
-  function buildWebSearchQuery(gender, lengthId, faceShapeId, extraKeyword){
-    var genderWord = gender === "men" ? "メンズ" : "レディース";
-    var lengthWord = { short:"ショート", mid:"ミディアム", long:"ロング", omakase:"" }[lengthId] || "";
-    var faceWord = "";
-    if(faceShapeId){
-      var fs = FACE_SHAPES.filter(function(x){ return x.id === faceShapeId; })[0];
-      if(fs) faceWord = fs.label;
-    }
-    var base = [genderWord, lengthWord, faceWord, "髪型"].filter(Boolean);
-    if(extraKeyword && extraKeyword.trim()) base.push(extraKeyword.trim());
-    var negative = ["-イラスト","-マンガ","-コラ","-芸能人","-グッズ"];
-    return base.join(" ") + " " + negative.join(" ");
-  }
-
-  // Web検索モーダルを開く（スケルトン表示 → モック検索 → 結果グリッド表示）
-  function openWebSearchModal(gender, lengthId, extraKeyword){
-    var phone = byId("phone");
-    var query = buildWebSearchQuery(gender, lengthId, state.faceShape, extraKeyword);
-
-    var overlay = el("div","web-modal-overlay");
-    var modal = el("div","web-modal");
-
-    var head = el("div","web-modal-head");
-    var title = el("div","web-modal-title","🔍 Webから似た雰囲気を探す");
-    var closeBtn = el("button","web-modal-close","✕");
-    closeBtn.addEventListener("click", function(){ overlay.remove(); });
-    head.appendChild(title);
-    head.appendChild(closeBtn);
-    modal.appendChild(head);
-
-    modal.appendChild(el("div","web-modal-query","検索キーワード：" + query));
-
-    var loadingText = el("div","web-modal-loading-text","AIが最新のWebヘアカタログから類似スタイルを検索中…");
-    modal.appendChild(loadingText);
-
-    var grid = el("div","web-result-grid");
-    for(var s=0; s<8; s++){ grid.appendChild(el("div","web-skeleton")); }
-    modal.appendChild(grid);
-
-    overlay.appendChild(modal);
-    phone.appendChild(overlay);
-
-    searchWebImages(query).then(function(result){
-      loadingText.remove();
-      grid.innerHTML = "";
-      if(result.results.length === 0){
-        grid.remove();
-        modal.appendChild(el("div","web-empty-note","該当するイメージが見つかりませんでした。キーワードを変えてお試しください。"));
-        return;
-      }
-      result.results.forEach(function(item){
-        var card = el("button","web-result-card");
-        var thumb = el("div","web-result-thumb");
-        thumb.style.background = "hsl(" + item.hue + ",36%,90%)";
-        thumb.innerHTML = silhouetteSVG("front", item.hue);
-        card.appendChild(thumb);
-
-        var src = el("div","web-result-source");
-        src.appendChild(document.createTextNode("出典：" + item.domain));
-        card.appendChild(src);
-
-        card.addEventListener("click", function(){
-          onSelectWebResult(item, gender, lengthId, query, overlay);
-        });
-        grid.appendChild(card);
-      });
-    });
-
-    overlay.addEventListener("click", function(e){
-      if(e.target === overlay) overlay.remove();
-    });
-  }
-
-  // Web検索結果からスタイルを選択 → 通常のスタイル確定フローに合流させる
-  function onSelectWebResult(item, gender, lengthId, query, overlay){
-    overlay.remove();
-    var style = {
-      id: item.id,
-      gender: gender,
-      length: (lengthId === "omakase") ? "mid" : lengthId,
-      name: "Web参考スタイル",
-      sub: "検索キーワード「" + query + "」から選択",
-      source: "web",
-      sourceDomain: item.domain,
-      sourceUrl: item.url
-    };
-    onConfirmStyle(style, false);
   }
 
   /* =========================================================
@@ -1477,18 +1279,16 @@
       });
       cwrap.appendChild(grid);
 
-      // ---- ハイブリッド画像提示：プリセットにしっくりこない場合のWeb検索補完 ----
-      var webRow = el("div","web-search-row");
-      var webInput = el("input","web-search-input");
-      webInput.type = "text";
-      webInput.placeholder = "雰囲気キーワード（任意）例：韓国風、爽やか";
-      var webBtn = el("button","mini-btn web-search-btn","🔍 Webから他のイメージを探す");
-      webBtn.addEventListener("click", function(){
-        openWebSearchModal(entry.gender, entry.lengthId, webInput.value);
+      // ---- プリセットにしっくりこない場合は、お客様ご自身の参考画像をアップロードして解析 ----
+      // （Webから画像を集めて表示する機能は、著作権・肖像権の観点から見送り、
+      //   既存のスクショ解析フローに一本化しています）
+      var uploadRow = el("div","upload-hint-row");
+      var uploadBtn = el("button","mini-btn","📷 気に入った画像をアップロードして解析する");
+      uploadBtn.addEventListener("click", function(){
+        byId("fileScreenshot").click();
       });
-      webRow.appendChild(webInput);
-      webRow.appendChild(webBtn);
-      cwrap.appendChild(webRow);
+      uploadRow.appendChild(uploadBtn);
+      cwrap.appendChild(uploadRow);
 
       return cwrap;
     }
@@ -1506,7 +1306,7 @@
       var style = entry.styleObj || styleById(entry.styleId);
       var confirmWrap = el("div","catalog-wrap");
       var card = el("div","full-card");
-      card.innerHTML = duoCardMarkup(style) + '<div class="meta"><div><div class="name">'+style.name+'</div><div class="sub">'+genderLabel(style.gender)+' ・ '+lengthLabel(style.length)+' ・ '+style.sub+'</div></div></div>' + styleSourceNote(style);
+      card.innerHTML = duoCardMarkup(style) + '<div class="meta"><div><div class="name">'+style.name+'</div><div class="sub">'+genderLabel(style.gender)+' ・ '+lengthLabel(style.length)+' ・ '+style.sub+'</div></div></div>';
       confirmWrap.appendChild(card);
       var actions = el("div","chip-row");
       actions.style.paddingLeft = "0";
@@ -1814,7 +1614,7 @@
     screen.appendChild(head);
 
     var mainCard = el("div","full-card");
-    mainCard.innerHTML = duoCardMarkup(style) + '<div class="meta"><div><div class="name">'+style.name+'</div><div class="sub">'+genderLabel(style.gender)+' ・ '+lengthLabel(style.length)+'</div></div></div>' + styleSourceNote(style);
+    mainCard.innerHTML = duoCardMarkup(style) + '<div class="meta"><div><div class="name">'+style.name+'</div><div class="sub">'+genderLabel(style.gender)+' ・ '+lengthLabel(style.length)+'</div></div></div>';
     screen.appendChild(mainCard);
 
     var diagGrid = el("div","diag-grid");
