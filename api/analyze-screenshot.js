@@ -1,62 +1,59 @@
-// スクリーンショット解析API（Vercel Serverless Function）
-// ユーザーが送ったヘアスタイルのスクリーンショット画像を Gemini API に送り、
-// カタログ（catalog.json）の中から最も近いスタイルを1つ選んでもらう。
+// api/analyze-screenshot.js
+// 「なりたい髪型」の参考写真を Gemini Vision API で解析し、
+// { length, bangs, color, texture, confidence } の形で返す Vercel Serverless Function。
 //
-// 必要な環境変数（Vercelのプロジェクト設定 > Environment Variables で設定）:
-//   GEMINI_API_KEY = あなたのGemini APIキー
-//
-// 注意: カタログの内容を変更した場合は、public/catalog.json と
-//       フロントエンド（public/index.html内のCATALOG）の両方を更新すること。
+// フロントエンド（public/index.html）は、このAPIが失敗した場合（エラー応答・通信失敗など）に
+// 自動的にデモ解析（ランダム表示）へフォールバックする作りになっているため、
+// このファイル側は「うまくいかない時は素直にエラーを返す」だけでよい。
 
-import { readFile } from "fs/promises";
-import path from "path";
+const GEMINI_MODEL = "gemini-flash-latest";
+
+// フロント側（index.html）が選択肢として使っているタグと完全に一致させる。
+// ここがズレると「選んだスタイルとの一致：X/4項目」の判定が正しく機能しない。
+const LENGTH_OPTIONS  = ["ショート", "ミディアム", "ロング"];
+const BANGS_OPTIONS   = ["シースルーバング", "流し前髪", "前髪なし", "ぱっつん前髪", "センターパート"];
+const COLOR_OPTIONS   = ["ベージュ", "暗髪ブラウン", "アッシュグレー", "黒髪"];
+const TEXTURE_OPTIONS = ["ストレート", "ゆるふわウェーブ", "強めパーマ", "無造作ウェーブ"];
+
+function buildPrompt() {
+  return `
+あなたはプロの美容師です。添付された画像に写っている「なりたい髪型」の参考写真を分析してください。
+
+【重要な注意事項】
+画像内に写っている店名・個人名・SNSハンドル・ロゴ・透かし・電話番号などの文字情報は、
+分析には一切使用せず、出力にも含めないでください。あくまで髪型そのものの見た目だけを分析対象としてください。
+
+以下の4項目について、それぞれ指定された選択肢の中から画像に最も近いものを1つだけ選んでください。
+（選択肢以外の言葉は使わないでください）
+
+- length（長さ）: ${LENGTH_OPTIONS.join(" / ")}
+- bangs（前髪）: ${BANGS_OPTIONS.join(" / ")}
+- color（カラー）: ${COLOR_OPTIONS.join(" / ")}
+- texture（質感）: ${TEXTURE_OPTIONS.join(" / ")}
+
+必ず次のJSON形式のみで回答してください（説明文やコードブロックの記号は不要です）。
+{"length": "...", "bangs": "...", "color": "...", "texture": "...", "confidence": 0.0〜1.0の数値}
+`.trim();
+}
 
 export default async function handler(req, res) {
   if (req.method !== "POST") {
-    res.status(405).json({ error: "Method not allowed" });
-    return;
+    return res.status(405).json({ error: "Method not allowed" });
+  }
+
+  const apiKey = process.env.GEMINI_API_KEY;
+  if (!apiKey) {
+    return res.status(500).json({ error: "GEMINI_API_KEY is not set" });
+  }
+
+  const { imageBase64, mimeType } = req.body || {};
+  if (!imageBase64 || !mimeType) {
+    return res.status(400).json({ error: "imageBase64 and mimeType are required" });
   }
 
   try {
-    const { imageBase64, mimeType, gender } = req.body || {};
-    if (!imageBase64) {
-      res.status(400).json({ error: "imageBase64 is required" });
-      return;
-    }
-
-    const apiKey = process.env.GEMINI_API_KEY;
-    if (!apiKey) {
-      res.status(500).json({ error: "GEMINI_API_KEY is not configured on the server" });
-      return;
-    }
-
-    const catalogPath = path.join(process.cwd(), "public", "catalog.json");
-    const catalogRaw = await readFile(catalogPath, "utf-8");
-    const catalog = JSON.parse(catalogRaw);
-    const candidates = gender ? catalog.filter((c) => c.gender === gender) : catalog;
-
-    const listText = candidates
-      .map((c) => `- id:"${c.id}" name:"${c.name}"（${c.sub}）`)
-      .join("\n");
-
-    const prompt =
-      "あなたは美容師のアシスタントです。添付されたヘアスタイルのスクリーンショット画像を見て、" +
-      "以下のカタログの中から見た目が最も近いスタイルを1つだけ選んでください。\n\n" +
-      listText +
-      "\n\n重要な注意事項：\n" +
-      "・判定材料は髪型の視覚的特徴（長さ・質感・前髪・カラー・シルエットなど）のみとし、" +
-      "画像内に写り込んだ文字情報（人物名、店舗名、SNSアカウント名、キャプション、ロゴ、透かし、" +
-      "電話番号など）は一切読み取らず、判定に一切使用しないでください。\n" +
-      "・応答に画像内の文字情報を引用・転記・要約しないでください。\n" +
-      "\n必ず次のJSON形式のみで回答してください（説明文やコードブロックは不要）:\n" +
-      '{"styleId": "選んだid", "confidence": 0から1の数値}';
-
-    // gemini-flash-latest は Google 側が常に「その時点で推奨されるFlashモデル」を指すように
-    // 自動で切り替えてくれるエイリアス。個別バージョン名（例: gemini-2.0-flash）を指定すると
-    // 将来そのモデルが廃止された際に404エラーになるため、ここではあえて固定しない。
     const geminiRes = await fetch(
-      "https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=" +
-        apiKey,
+      `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${apiKey}`,
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -64,48 +61,59 @@ export default async function handler(req, res) {
           contents: [
             {
               parts: [
-                { text: prompt },
-                { inline_data: { mime_type: mimeType || "image/jpeg", data: imageBase64 } }
+                { text: buildPrompt() },
+                { inline_data: { mime_type: mimeType, data: imageBase64 } }
               ]
             }
-          ]
+          ],
+          generationConfig: {
+            responseMimeType: "application/json"
+          }
         })
       }
     );
 
     if (!geminiRes.ok) {
       const errText = await geminiRes.text();
-      res.status(502).json({ error: "Gemini API error", detail: errText });
-      return;
+      console.error("Gemini API error:", geminiRes.status, errText);
+      return res.status(502).json({ error: "Gemini API request failed" });
     }
 
     const data = await geminiRes.json();
-    const text = data?.candidates?.[0]?.content?.parts?.[0]?.text || "";
-    const match = text.match(/\{[\s\S]*\}/);
-    if (!match) {
-      res.status(502).json({ error: "Could not parse Gemini response", raw: text });
-      return;
+    const rawText = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+    if (!rawText) {
+      return res.status(502).json({ error: "No content returned from Gemini" });
     }
 
     let parsed;
     try {
-      parsed = JSON.parse(match[0]);
+      parsed = JSON.parse(rawText);
     } catch (e) {
-      res.status(502).json({ error: "Invalid JSON from Gemini", raw: text });
-      return;
+      console.error("Failed to parse Gemini response as JSON:", rawText);
+      return res.status(502).json({ error: "Invalid JSON from Gemini" });
     }
 
-    const found = catalog.find((c) => c.id === parsed.styleId);
-    if (!found) {
-      res.status(502).json({ error: "Unexpected styleId value", raw: parsed });
-      return;
+    // 想定外の値が返ってきた場合は、フロント側のデモ解析にフォールバックさせるためエラーにする
+    const isValid =
+      LENGTH_OPTIONS.includes(parsed.length) &&
+      BANGS_OPTIONS.includes(parsed.bangs) &&
+      COLOR_OPTIONS.includes(parsed.color) &&
+      TEXTURE_OPTIONS.includes(parsed.texture);
+
+    if (!isValid) {
+      console.error("Gemini returned unexpected values:", parsed);
+      return res.status(502).json({ error: "Unexpected values from Gemini" });
     }
 
-    res.status(200).json({
-      styleId: parsed.styleId,
-      confidence: typeof parsed.confidence === "number" ? parsed.confidence : null
+    return res.status(200).json({
+      length: parsed.length,
+      bangs: parsed.bangs,
+      color: parsed.color,
+      texture: parsed.texture,
+      confidence: typeof parsed.confidence === "number" ? parsed.confidence : 0.8
     });
   } catch (err) {
-    res.status(500).json({ error: String(err && err.message ? err.message : err) });
+    console.error("analyze-screenshot error:", err);
+    return res.status(500).json({ error: "Internal server error" });
   }
 }
