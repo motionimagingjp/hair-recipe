@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>HAIR Recipe</title>
+<title>スクアド</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@500;700&family=Zen+Kaku+Gothic+New:wght@400;500;700;900&display=swap" rel="stylesheet">
@@ -687,7 +687,7 @@
       <header class="app-header" id="appHeader">
         <div class="brand-mark" id="brandMark">髪</div>
         <div class="header-text">
-          <div class="header-mode" id="headerMode">スクアド HAIR ADVISOR</div>
+          <div class="header-mode" id="headerMode">スクアド ヘアスタイル</div>
           <div class="header-app" id="headerApp">ヘアアドバイザー</div>
         </div>
         <div class="header-icons">
@@ -743,9 +743,9 @@
      0. データ定義
   ========================================================= */
   var TABS = [
-    { id:"hair",       label:"ヘア",         accent:"--accent-hair",       accentSoft:"--accent-hair-soft",       app:"ヘアアドバイザー", mode:"スクアド HAIR ADVISOR", mark:"髪" },
-    { id:"fashion",    label:"ファッション", accent:"--accent-fashion",    accentSoft:"--accent-fashion-soft",    app:"ファッション相談", mode:"FASHION",      mark:"服" },
-    { id:"restaurant", label:"レストラン",   accent:"--accent-restaurant", accentSoft:"--accent-restaurant-soft", app:"デート店検索",     mode:"RESTAURANT",   mark:"店" },
+    { id:"hair",       label:"ヘア",         accent:"--accent-hair",       accentSoft:"--accent-hair-soft",       app:"ヘアアドバイザー", mode:"スクアド ヘアスタイル", mark:"髪" },
+    { id:"fashion",    label:"ファッション", accent:"--accent-fashion",    accentSoft:"--accent-fashion-soft",    app:"ファッションアドバイザー", mode:"スクアド ファッション",      mark:"服" },
+    { id:"restaurant", label:"レストラン",   accent:"--accent-restaurant", accentSoft:"--accent-restaurant-soft", app:"メンズ向けデート店アドバイザー",     mode:"スクアド レストラン",   mark:"店" },
     // 「オーダー」はボトムタブから外し、ヘッダーのカルテアイコンから開く導線に変更（ヘア専用に見えないようにするため）
     { id:"order",      label:"カルテ",       accent:"--accent-order",      accentSoft:"--accent-order-soft",      app:"オーダーシート",   mode:"ORDER SHEET",  mark:"票" },
     { id:"about",      label:"このアプリについて", accent:"--accent-order", accentSoft:"--accent-order-soft",      app:"このアプリについて", mode:"ABOUT",       mark:"i" }
@@ -1864,7 +1864,7 @@
     if(state.outfit){
       screen.appendChild(el("div","advice-box", "「"+state.outfit+"」を選択中です。"));
     }else{
-      var goFashion = el("button","mini-btn","ファッション相談へ");
+      var goFashion = el("button","mini-btn","ファッションアドバイザーへ");
       goFashion.addEventListener("click", function(){ state.tab="fashion"; render(); });
       var noOutfit = el("div","empty-state");
       noOutfit.style.padding = "10px 4px";
