@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>HAIR Recipe</title>
+<title>スクアド</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@500;700&family=Zen+Kaku+Gothic+New:wght@400;500;700;900&display=swap" rel="stylesheet">
@@ -485,6 +485,7 @@
     position:relative;
   }
   .composer[hidden]{display:none;}
+  .composer-plus[hidden]{display:none;}
   .composer-plus, .composer-send{
     width:34px;height:34px;border-radius:50%;flex:0 0 auto;
     display:flex;align-items:center;justify-content:center; cursor:pointer;
@@ -512,6 +513,7 @@
     padding:9px 10px;border-radius:8px;font-family:var(--font-body);font-size:12.5px;color:var(--ink);cursor:pointer;
     display:flex;align-items:center;gap:8px;
   }
+  .attach-menu button[hidden]{display:none;}
   .attach-menu button:hover{background:var(--surface-2);}
   .attach-menu button svg{width:15px;height:15px; color:var(--ink-soft);}
 
@@ -522,7 +524,9 @@
     background:var(--tab-accent, var(--accent-hair)); color:#fff;
     display:flex;align-items:center;justify-content:center;
     font-family:var(--font-display); font-size:22px; font-weight:700;
+    overflow:hidden;
   }
+  .about-avatar img{width:100%;height:100%;object-fit:cover;display:block;}
   .about-name{font-weight:700; font-size:14.5px;}
   .about-tagline{font-size:12px; color:var(--ink-soft); margin-top:3px; line-height:1.6;}
   .sns-row{display:flex; gap:10px; margin-top:2px;}
@@ -537,26 +541,15 @@
     background:none;border:none;color:var(--ink-soft);font-size:12px;cursor:pointer;
     padding:0;display:inline-flex;align-items:center;gap:4px;
   }
-  .app-ref-list{display:flex; flex-direction:column; gap:8px;}
-  .app-ref-item{
-    display:block; text-decoration:none; color:inherit;
-    background:var(--surface); border:1px solid var(--line);
-    border-radius:var(--radius-md); padding:10px 13px;
-  }
-  .app-ref-item[href]{ cursor:pointer; }
-  .app-ref-item[href]:active{ transform:scale(.98); }
-  .app-ref-name{font-size:13px; font-weight:700; color:var(--ink); display:flex; align-items:center; gap:6px;}
-  .app-ref-desc{font-size:11.5px; color:var(--ink-soft); margin-top:2px; line-height:1.5;}
-  .app-ref-current-tag{
-    font-size:10px; font-weight:700; padding:2px 7px; border-radius:999px;
-    background:var(--tab-accent-soft); color:var(--tab-accent);
-  }
-  .app-ref-item.current{ opacity:.85; }
 
   /* ---------- generic screen furniture ---------- */
   .section-label{
     font-size:11px; letter-spacing:.08em; text-transform:uppercase;
     color:var(--ink-faint); font-weight:700; margin:2px 0 -2px;
+  }
+  .section-label-highlight{
+    font-size:12.5px; letter-spacing:.04em; text-transform:none;
+    color:#d64545; font-weight:800; margin:2px 0 -2px;
   }
   .empty-state{
     margin-top:auto; margin-bottom:auto;
@@ -618,6 +611,12 @@
   }
   .diag-item .k{font-size:9.5px; color:var(--ink-faint); letter-spacing:.05em;}
   .diag-item .v{font-size:12.5px; font-weight:700; margin-top:2px;}
+  .diag-item select.v-select{
+    font-size:12.5px; font-weight:700; margin-top:2px;
+    border:none; background:transparent; color:var(--ink);
+    font-family:var(--font-body); text-align:center; text-align-last:center;
+    width:100%; cursor:pointer; -webkit-appearance:none; appearance:none;
+  }
   .advice-box{
     background:var(--surface-2); border-left:3px solid var(--tab-accent);
     border-radius:0 10px 10px 0; padding:11px 13px; font-size:12.5px; line-height:1.7; color:var(--ink);
@@ -627,6 +626,19 @@
     font-family:var(--font-body); font-size:12.5px; line-height:1.6;
     border:1px solid var(--line); border-radius:10px; padding:9px 10px;
     background:var(--surface); color:var(--ink);
+  }
+  .btn-row{display:flex; gap:6px; flex-wrap:wrap; margin-top:8px;}
+  .btn-row .mini-btn{flex:1 1 auto; justify-content:center; display:inline-flex; align-items:center;}
+  .btn-chatgpt{background:#10A37F; color:#fff; border-color:transparent;}
+  .btn-gemini{background:#4285F4; color:#fff; border-color:transparent;}
+  .upload-btn{
+    width:100%; background:var(--surface); border:1.5px dashed var(--tab-accent);
+    color:var(--tab-accent); border-radius:10px; padding:11px; font-size:12.5px;
+    font-weight:700; cursor:pointer; font-family:var(--font-body);
+  }
+  .upload-confirm{
+    font-size:12px; color:var(--tab-accent); font-weight:700; margin-top:8px;
+    display:flex; align-items:center; gap:5px;
   }
   .sim-frame{
     display:grid; grid-template-columns:1fr 1fr; gap:8px;
@@ -679,7 +691,7 @@
       <header class="app-header" id="appHeader">
         <div class="brand-mark" id="brandMark">髪</div>
         <div class="header-text">
-          <div class="header-mode" id="headerMode">HAIR ADVISOR</div>
+          <div class="header-mode" id="headerMode">スクアド ヘアスタイル</div>
           <div class="header-app" id="headerApp">ヘアアドバイザー</div>
         </div>
         <div class="header-icons">
@@ -714,6 +726,14 @@
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3l2-2h6l2 2h3v11H4z"/><circle cx="12" cy="13.5" r="3.5"/></svg>
             <span>スクショを送信する</span>
           </button>
+          <button type="button" id="attachFashionTodayBtn" hidden>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3l2-2h6l2 2h3v11H4z"/><circle cx="12" cy="13.5" r="3.5"/></svg>
+            <span>今日の服装を送る</span>
+          </button>
+          <button type="button" id="attachFashionReferenceBtn" hidden>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3l2-2h6l2 2h3v11H4z"/><circle cx="12" cy="13.5" r="3.5"/></svg>
+            <span>参考画像を送る</span>
+          </button>
         </div>
       </div>
 
@@ -725,6 +745,9 @@
 
 <input type="file" id="fileScreenshot" accept="image/*">
 <input type="file" id="fileFaceShape" accept="image/*">
+<input type="file" id="fileGeneratedImage" accept="image/*">
+<input type="file" id="fileFashionToday" accept="image/*">
+<input type="file" id="fileFashionReference" accept="image/*">
 
 <script>
 (function(){
@@ -734,9 +757,9 @@
      0. データ定義
   ========================================================= */
   var TABS = [
-    { id:"hair",       label:"ヘア",         accent:"--accent-hair",       accentSoft:"--accent-hair-soft",       app:"ヘアアドバイザー", mode:"HAIR ADVISOR", mark:"髪" },
-    { id:"fashion",    label:"ファッション", accent:"--accent-fashion",    accentSoft:"--accent-fashion-soft",    app:"ファッション相談", mode:"FASHION",      mark:"服" },
-    { id:"restaurant", label:"レストラン",   accent:"--accent-restaurant", accentSoft:"--accent-restaurant-soft", app:"デート店検索",     mode:"RESTAURANT",   mark:"店" },
+    { id:"hair",       label:"ヘア",         accent:"--accent-hair",       accentSoft:"--accent-hair-soft",       app:"ヘアアドバイザー", mode:"スクアド ヘアスタイル", mark:"髪" },
+    { id:"fashion",    label:"ファッション", accent:"--accent-fashion",    accentSoft:"--accent-fashion-soft",    app:"ファッションアドバイザー", mode:"スクアド ファッション",      mark:"服" },
+    { id:"restaurant", label:"レストラン",   accent:"--accent-restaurant", accentSoft:"--accent-restaurant-soft", app:"デート店アドバイザー",     mode:"スクアド レストラン",   mark:"店" },
     // 「オーダー」はボトムタブから外し、ヘッダーのカルテアイコンから開く導線に変更（ヘア専用に見えないようにするため）
     { id:"order",      label:"カルテ",       accent:"--accent-order",      accentSoft:"--accent-order-soft",      app:"オーダーシート",   mode:"ORDER SHEET",  mark:"票" },
     { id:"about",      label:"このアプリについて", accent:"--accent-order", accentSoft:"--accent-order-soft",      app:"このアプリについて", mode:"ABOUT",       mark:"i" }
@@ -818,13 +841,7 @@
     ]
   };
 
-  var RESTAURANTS = [
-    { name:"個室イタリアン Luce",       area:"表参道", tags:["静かな個室"],           desc:"落ち着いた半個室でゆっくり会話できるイタリアン。" },
-    { name:"カウンター割烹 結", area:"銀座",   tags:["横並びカウンター席あり"], desc:"隣り合って座れる和食カウンター。初対面の緊張がほぐれやすい。" },
-    { name:"ブックカフェ Petrichor",     area:"代官山", tags:["初デート向けカフェ・ラウンジ"], desc:"明るく気軽な雰囲気で1軒目の待ち合わせにも最適。" },
-    { name:"ワインバー Nocturne",        area:"広尾",   tags:["静かな個室","横並びカウンター席あり"], desc:"照明を落とした落ち着いた空間で会話に集中できる。" },
-    { name:"テラスラウンジ Verde",       area:"六本木", tags:["初デート向けカフェ・ラウンジ"], desc:"開放的なテラス席がある、初回の顔合わせに向くラウンジ。" }
-  ];
+  // ---- レストランは固定データベースを廃止し、/api/restaurant-recommend への都度問い合わせ方式に変更 ----
 
   var TEXTURE_OPTS = ["軟らかい","普通","硬い"];
   var CROWN_OPTS   = ["真ん中","右","左"];
@@ -841,12 +858,30 @@
       chat:{ started:false, log:[] },
       selectedStyle:null,
       diagnosis:{ texture:null, crown:null, curl:null },
+      generatedImage:null, // 外部AIで生成した仕上がりイメージ（この端末内のみ保持、サーバー非保存）
       outfit:null,
       dateCandidates:[],
       dateMemo:"",
       seenFashionBadge:false,
       seenRestaurantBadge:false,
-      seenOrderBadge:false
+      seenOrderBadge:false,
+      // ---- ファッションアドバイザー用 ----
+      fashionChat:{ started:false, log:[] },
+      fashionMode:null,            // 'check'（ファッションチェック） | 'coordinate'（色コーデ）
+      fashionTaste:null,
+      fashionPersonalColor:null,
+      fashionOwnedTops:[],
+      fashionOwnedBottoms:[],
+      fashionDiagnosis:null,       // { top, bottom, topColor, bottomColor, jewelry }
+      fashionLastAdviceType:null,  // 'today' | 'reference' | 'coordinate'
+      fashionLastAdvice:null,      // { rawText, combo } コピー・詳細アドバイスで使用
+      fashionLastDetailText:null,
+      // ---- レストランアドバイザー用（チャット形式のヒアリング条件） ----
+      restaurantChat:{ started:false, log:[] },
+      restaurant:{
+        step:null, category:null, mealtime:null,
+        location:null, budgetLabel:null, budgetNote:null, extraNote:null
+      }
     };
     try{
       var raw = localStorage.getItem("hairRecipeState_v1");
@@ -897,16 +932,44 @@
       reader.readAsDataURL(file);
     });
   }
+  // クリップボードAPIが使えない環境（モバイルの一部ブラウザ・アプリ内ブラウザ等）向けのフォールバック
+  function fallbackCopyText(text){
+    try{
+      var ta = document.createElement("textarea");
+      ta.value = text;
+      ta.style.position = "fixed";
+      ta.style.opacity = "0";
+      document.body.appendChild(ta);
+      ta.select();
+      var ok = document.execCommand("copy");
+      document.body.removeChild(ta);
+      return ok;
+    }catch(e){
+      return false;
+    }
+  }
   function copyText(text){
     if(navigator.clipboard && navigator.clipboard.writeText){
       navigator.clipboard.writeText(text).then(function(){
         toast("コピーしました");
       }).catch(function(){
-        toast("コピーできませんでした。手動で選択してコピーしてください");
+        toast(fallbackCopyText(text) ? "コピーしました" : "コピーできませんでした。手動で選択してコピーしてください");
       });
     }else{
-      toast("コピーできませんでした。手動で選択してコピーしてください");
+      toast(fallbackCopyText(text) ? "コピーしました" : "コピーできませんでした。手動で選択してコピーしてください");
     }
+  }
+  // コピー＋外部の生成AIサービスを新規タブで開く（クリップボードAPIが使えない環境向けのフォールバック付き）
+  async function copyAndOpen(text, url, serviceName){
+    var copied = false;
+    try{
+      await navigator.clipboard.writeText(text);
+      copied = true;
+    }catch(e){
+      copied = fallbackCopyText(text);
+    }
+    window.open(url, "_blank", "noopener");
+    toast(copied ? "コピーしました。"+serviceName+"に貼り付けてください" : serviceName+"を開きました。プロンプトは手動でコピーしてください");
   }
 
   /* ---- 正面/サイド プレースホルダー用シルエットSVG ---- */
@@ -919,6 +982,11 @@
     return '<svg viewBox="0 0 100 100" fill="none"><path d="M38 20c14-4 26 4 28 16 1 6-1 9 2 12 3 3 6 2 6 6 0 3-4 4-7 5 1 5-1 9-5 11 2 4 1 8-2 10-8 5-22 4-30-4-9-9-9-26 1-38 2-3 4-6 7-8z" fill="'+fill+'" stroke="'+stroke+'" stroke-width="2.5" stroke-linejoin="round"/><path d="M18 92c1-18 8-28 18-31" fill="'+fill+'" stroke="'+stroke+'" stroke-width="2.5" stroke-linecap="round"/></svg>';
   }
   function duoCardMarkup(style, size){
+    // 「なりたい髪型」写真の解析結果は、本人がアップロードした参考写真をそのまま表示する
+    // （分析結果が正しいかを本人が一目で確認できるようにするため）
+    if(style.refPhoto){
+      return '<div class="duo duo-photo"><img src="'+style.refPhoto+'" alt="'+style.name+'"></div>';
+    }
     // 実アセットがある場合はそのまま1枚画像（正面+サイド+ヘッダー込み・16:9）を表示。
     if(style.img && IMAGES[style.img]){
       return '<div class="duo duo-photo"><img src="'+IMAGES[style.img]+'" alt="'+style.name+'"></div>';
@@ -954,9 +1022,32 @@
     return m ? { mimeType: m[1], base64: m[2] } : null;
   }
 
-  // 📸 スクショ解析: /api/analyze-screenshot（Gemini APIを呼ぶVercel Serverless Function）に
-  // 画像を送信し、カタログの中から最も近いスタイルのIDを判定してもらう。
-  // APIキー未設定・通信エラー時は、従来のモック（ランダム選択）にフォールバックする。
+  // 📸 なりたい髪型の分析：カタログの中から近いものを当てるのではなく、
+  // 写真そのものから「長さ・前髪・カラー・質感」を直接言葉で説明してもらい、
+  // それをそのままオーダーシートの文言に反映する（カタログに縛られない）
+  var ANALYSIS_LENGTHS  = ["ショート","ミディアム","ロング"];
+  var ANALYSIS_BANGS    = ["シースルーバング","流し前髪","前髪なし","ぱっつん前髪","センターパート"];
+  var ANALYSIS_COLORS   = ["ベージュ","暗髪ブラウン","アッシュグレー","黒髪"];
+  var ANALYSIS_TEXTURES = ["ストレート","ゆるふわウェーブ","強めパーマ","無造作ウェーブ"];
+  function pickRandom(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
+
+  // 分析結果（{length, bangs, color, texture}）から、他の画面でも扱えるスタイルオブジェクトを組み立てる。
+  // refPhoto にアップロード写真を保持することで、確認画面ではイラストではなく本人の参考写真を表示できる。
+  function buildStyleFromAnalysis(desc, refPhoto){
+    return {
+      id: "photo-" + Date.now(),
+      gender: state.gender,
+      length: desc.length,
+      name: [desc.bangs, desc.color].filter(Boolean).join("×"),
+      sub: [desc.length, desc.bangs, desc.color, desc.texture].filter(Boolean).join("／"),
+      refPhoto: refPhoto,
+      fromPhoto: true
+    };
+  }
+
+  // 📸 なりたい髪型の分析: /api/analyze-screenshot（Gemini APIを呼ぶVercel Serverless Function）に
+  // 画像を送信し、{ length, bangs, color, texture } の形で特徴を判定してもらう。
+  // APIキー未設定・通信エラー時は、従来のモック（ランダムな特徴の組み合わせ）にフォールバックする。
   async function analyzeScreenshot(dataUrl){
     var parts = dataUrlToParts(dataUrl);
     if(parts){
@@ -968,17 +1059,22 @@
         });
         if(res.ok){
           var data = await res.json();
-          var matched = styleById(data.styleId);
-          if(matched){
-            return { style: matched, confidence: (typeof data.confidence === "number" ? data.confidence : 0.8), mock:false };
+          if(data && data.length && data.bangs){
+            var style = buildStyleFromAnalysis(data, dataUrl);
+            return { style: style, confidence: (typeof data.confidence === "number" ? data.confidence : 0.8), mock:false };
           }
         }
       }catch(e){ /* 通信エラー時は下のモックにフォールバック */ }
     }
     await sleep(1100);
-    var candidates = CATALOG.filter(function(s){ return !s.pending; });
-    var pick = candidates[Math.floor(Math.random()*candidates.length)];
-    return { style: pick, confidence: 0.7 + Math.random()*0.25, mock:true };
+    var mockDesc = {
+      length:  pickRandom(ANALYSIS_LENGTHS),
+      bangs:   pickRandom(ANALYSIS_BANGS),
+      color:   pickRandom(ANALYSIS_COLORS),
+      texture: pickRandom(ANALYSIS_TEXTURES)
+    };
+    var style = buildStyleFromAnalysis(mockDesc, dataUrl);
+    return { style: style, confidence: 0.7 + Math.random()*0.25, mock:true };
   }
 
   // 🧑‍🎨 顔型診断: /api/analyze-face-shape（Gemini APIを呼ぶVercel Serverless Function）に
@@ -1014,14 +1110,23 @@
   // これにより画像生成のコスト・品質リスク・顔写真の取り扱いリスクを負わずに、
   // 「試したい人だけ試せる」導線を用意できる。
   function buildExternalPrompt(style){
-    return "添付した人物写真の髪型だけを「" + style.name + "」（" + style.sub + "）に変更してください。"
+    return "【最初に確認】このメッセージに人物写真が添付されていますか？添付されていない場合は、画像の生成は行わず「お顔がわかる写真を添付してください」とだけ返信してください。\n\n"
+      + "写真が添付されている場合は、添付した人物写真の髪型だけを「" + style.name + "」（" + style.sub + "）に変更してください。"
       + "顔立ち・肌の色・背景はそのまま保持し、正面から見た写真と横顔（サイド）から見た写真の2枚を生成してください。";
   }
 
   /* =========================================================
      4. スタイリングアドバイス生成（テンプレート）
   ========================================================= */
+  // スタイルの sub（例：「シースルーバング／ベージュカラー」）を
+  // 「シースルーバング、ベージュカラー」のような読みやすいタグ文言に変換する
+  function styleTagsText(style){
+    var parts = (style.sub || "").split(/[・×／\/]/).map(function(p){ return p.trim(); }).filter(Boolean);
+    return parts.length ? parts.join("、") : (style.sub || "");
+  }
+
   function buildAdvice(style, diag){
+    var styleNote = "ご希望のスタイルは「"+style.name+"」（"+styleTagsText(style)+"）です。この特徴を再現してください。";
     var lenNote = {
       short:"襟足とサイドは短めに詰め、トップに立体感を残してください。",
       mid:  "全体の長さは耳〜顎ラインを基準に、毛先に動きが出るようレイヤーを入れてください。",
@@ -1042,7 +1147,7 @@
       "弱い":"軽い癖があるため、乾かし方次第で表情が変わる点をご留意ください。",
       "強い":"強い癖があるため、縮毛矯正または癖を活かしたパーマ設計のご提案をお願いします。"
     }[diag.curl] || "";
-    return [lenNote, textureNote, crownNote, curlNote].filter(Boolean).join(" ");
+    return [styleNote, lenNote, textureNote, crownNote, curlNote].filter(Boolean).join(" ");
   }
 
   /* =========================================================
@@ -1106,9 +1211,23 @@
     byId("infoBtn").classList.toggle("active", state.tab === "about");
   }
 
+  // ヘアの会話・選択結果を最初からやり直すための共通リセット処理
+  // （性別を切り替えたときと、明示的な「最初から」ボタンの両方から呼び出す）
+  function resetHairFlow(){
+    state.chat = { started:false, log:[] };
+    state.faceShape = null;
+    state.selectedStyle = null;
+    state.diagnosis = { texture:null, crown:null, curl:null };
+    state.outfit = null;
+    state.seenFashionBadge = false;
+    state.seenRestaurantBadge = false;
+    state.seenOrderBadge = false;
+    saveState();
+  }
+
   function renderSubbar(){
     var bar = byId("subbar");
-    var showGenderToggle = (state.tab === "hair" || state.tab === "fashion");
+    var showGenderToggle = (state.tab === "hair" || state.tab === "fashion" || state.tab === "restaurant");
     if(!showGenderToggle){
       bar.hidden = true;
       bar.innerHTML = "";
@@ -1124,26 +1243,44 @@
         if(state.gender === g) return;
         state.gender = g;
         // 対象（メンズ/レディース）を切り替えたら、これまでの会話・選択結果はリセットして
-        // 新しい性別の診断フローを最初からやり直せるようにする
-        state.chat = { started:false, log:[] };
-        state.faceShape = null;
-        state.selectedStyle = null;
-        state.diagnosis = { texture:null, crown:null, curl:null };
-        state.outfit = null;
-        state.seenFashionBadge = false;
-        state.seenRestaurantBadge = false;
-        state.seenOrderBadge = false;
-        saveState();
+        // 新しい性別の診断フローを最初からやり直せるようにする（ヘア・ファッション両方）
+        resetHairFlow();
+        resetFashionFlow();
+        resetRestaurantFlow();
         render();
       });
       toggle.appendChild(b);
     });
     bar.appendChild(toggle);
+
+    if(state.tab === "hair" || state.tab === "fashion" || state.tab === "restaurant"){
+      var resetLink = el("button","close-link","🔄 最初から");
+      resetLink.style.marginLeft = "auto";
+      resetLink.addEventListener("click", function(){
+        if(state.tab === "hair") resetHairFlow();
+        else if(state.tab === "fashion") resetFashionFlow();
+        else resetRestaurantFlow();
+        render();
+      });
+      bar.appendChild(resetLink);
+    }
   }
 
   function renderComposer(){
     var bar = byId("composer");
-    bar.hidden = (state.tab !== "hair");
+    var showComposer = (state.tab === "hair" || state.tab === "fashion" || state.tab === "restaurant");
+    bar.hidden = !showComposer;
+    byId("composerPlusBtn").hidden = (state.tab === "restaurant");
+    byId("attachScreenshotBtn").hidden = (state.tab !== "hair");
+    byId("attachFashionTodayBtn").hidden = (state.tab !== "fashion");
+    byId("attachFashionReferenceBtn").hidden = (state.tab !== "fashion");
+    if(state.tab === "fashion"){
+      byId("composerInput").placeholder = "相談内容を入力（例：暑くなりそう）";
+    }else if(state.tab === "restaurant"){
+      byId("composerInput").placeholder = "エリアや予算を入力（例：渋谷、5000円くらい）";
+    }else{
+      byId("composerInput").placeholder = "メッセージを入力（例：短くしたい）";
+    }
   }
 
   function render(){
@@ -1169,7 +1306,8 @@
   function ensureGreeting(){
     if(!state.chat.started){
       state.chat.started = true;
-      pushLog({ type:"ai", text:"こんにちは！あなたに一番似合う髪型を一緒に見つけましょう。まずは、あなたの顔型（骨格）を教えてもらえますか？自撮りを1枚アップロードいただければAIが判定します。もちろん、ご自身で選んでいただいてもOKです！" });
+      pushLog({ type:"ai", text:"こんにちは！あなたに一番似合う髪型を一緒に見つけましょう。" });
+      pushLog({ type:"ai", text:"まずは顔型（骨格）を教えてください。ご自身で選ぶか、自撮りをアップロードしてください。" });
       pushLog({ type:"faceshape-prompt" });
     }
   }
@@ -1196,11 +1334,12 @@
     screen.scrollTop = screen.scrollHeight;
   }
 
-  function renderChatEntry(entry, idx){
+  function renderChatEntry(entry, idx, avatarMark){
+    avatarMark = avatarMark || "髪";
     if(entry.type === "ai" || entry.type === "user"){
       var row = el("div", "bubble-row" + (entry.type==="user" ? " user":""));
       if(entry.type==="ai"){
-        var av = el("div","avatar-ai","髪");
+        var av = el("div","avatar-ai",avatarMark);
         row.appendChild(av);
       }
       var bub = el("div", "bubble " + entry.type);
@@ -1217,7 +1356,7 @@
     }
     if(entry.type === "typing"){
       var row2 = el("div", "bubble-row");
-      row2.appendChild(el("div","avatar-ai","髪"));
+      row2.appendChild(el("div","avatar-ai",avatarMark));
       var bub2 = el("div","bubble ai");
       bub2.innerHTML = '<div class="typing-dots"><span></span><span></span><span></span></div>';
       row2.appendChild(bub2);
@@ -1238,8 +1377,41 @@
     }
     if(entry.type === "faceshape-prompt"){
       var fwrap = el("div","catalog-wrap");
+
+      // ① まず「直接選ぶ」（顔型チップ）を最優先で提示。1行に収まるよう3つ＋「その他」に絞る
+      var mainShapes = FACE_SHAPES.slice(0,3);
+      var moreShapes = FACE_SHAPES.slice(3);
+      var manualRow = el("div","chip-row");
+      manualRow.style.paddingLeft = "0";
+      mainShapes.forEach(function(fs){
+        var c = el("button","chip", fs.label);
+        c.addEventListener("click", function(){ onPickFaceShape(fs.id); });
+        manualRow.appendChild(c);
+      });
+      var moreBtn = el("button","chip", entry.expanded ? "− 閉じる" : "その他");
+      moreBtn.addEventListener("click", function(){ entry.expanded = !entry.expanded; saveState(); render(); });
+      manualRow.appendChild(moreBtn);
+      fwrap.appendChild(manualRow);
+
+      if(entry.expanded){
+        var moreRow = el("div","chip-row");
+        moreRow.style.paddingLeft = "0";
+        moreRow.style.marginTop = "6px";
+        moreShapes.forEach(function(fs){
+          var c = el("button","chip", fs.label);
+          c.addEventListener("click", function(){ onPickFaceShape(fs.id); });
+          moreRow.appendChild(c);
+        });
+        fwrap.appendChild(moreRow);
+      }
+
+      // ② 写真関連の2ボタンはその下にまとめて配置
       var uploadRow = el("div","chip-row");
       uploadRow.style.paddingLeft = "0";
+      uploadRow.style.marginTop = "10px";
+      var wantBtn = el("button","chip primary", "🖼️ なりたい髪型を添付");
+      wantBtn.addEventListener("click", function(){ byId("fileScreenshot").click(); });
+      uploadRow.appendChild(wantBtn);
       var upBtn = el("button","chip primary", ICONS.camera + ' <span style="margin-left:5px;">自撮りで診断する</span>');
       upBtn.style.display = "inline-flex";
       upBtn.style.alignItems = "center";
@@ -1249,18 +1421,9 @@
       uploadRow.appendChild(upBtn);
       fwrap.appendChild(uploadRow);
 
-      var manualRow = el("div","chip-row");
-      manualRow.style.paddingLeft = "0";
-      manualRow.style.marginTop = "6px";
-      FACE_SHAPES.forEach(function(fs){
-        var c = el("button","chip", fs.label);
-        c.addEventListener("click", function(){ onPickFaceShape(fs.id); });
-        manualRow.appendChild(c);
-      });
-      fwrap.appendChild(manualRow);
-
+      // ③ 顔型もなりたい画像も無い人向けの逃げ道として残す
       var skip = el("button","close-link","スキップしてスタイルを選ぶ →");
-      skip.style.marginTop = "8px";
+      skip.style.marginTop = "10px";
       skip.addEventListener("click", function(){ onSkipFaceShape(); });
       fwrap.appendChild(skip);
       return fwrap;
@@ -1327,13 +1490,206 @@
       actions.style.paddingLeft = "0";
       var b1 = el("button","chip primary","この髪型でオーダーシートを作る");
       b1.addEventListener("click", function(){ goToOrder(style); });
-      var b2 = el("button","chip","この髪型に合う服を見る");
-      b2.addEventListener("click", function(){ goToFashion(style); });
-      var b3 = el("button","chip","初デートのお店を探す");
-      b3.addEventListener("click", function(){ goToRestaurant(style); });
-      actions.appendChild(b1); actions.appendChild(b2); actions.appendChild(b3);
+      actions.appendChild(b1);
       confirmWrap.appendChild(actions);
       return confirmWrap;
+    }
+    if(entry.type === "fashion-mode-choice"){
+      var mwrap = el("div","chip-row");
+      mwrap.style.paddingLeft = "0";
+      var checkBtn = el("button","chip primary","👕 ファッションチェック");
+      checkBtn.addEventListener("click", function(){ onChooseFashionMode("check"); });
+      mwrap.appendChild(checkBtn);
+      var coordBtn = el("button","chip primary","💬 色コーデ");
+      coordBtn.addEventListener("click", function(){ onChooseFashionMode("coordinate"); });
+      mwrap.appendChild(coordBtn);
+      return mwrap;
+    }
+    if(entry.type === "fashion-taste-chips"){
+      var twrap = el("div","chip-row");
+      twrap.style.paddingLeft = "0";
+      ["シック","きれいめ","韓国風","イタリアンエレガンス","ストリート"].forEach(function(label){
+        var c = el("button","chip",label);
+        c.addEventListener("click", function(){ onSelectFashionTaste(label); });
+        twrap.appendChild(c);
+      });
+      var skipT = el("button","chip","スキップ");
+      skipT.addEventListener("click", function(){ onSelectFashionTaste(null); });
+      twrap.appendChild(skipT);
+      return twrap;
+    }
+    if(entry.type === "fashion-color-chips"){
+      var pwrap = el("div","chip-row");
+      pwrap.style.paddingLeft = "0";
+      [["イエベ春","🌸"],["イエベ秋","🍂"],["ブルベ夏","💧"],["ブルベ冬","❄️"]].forEach(function(pair){
+        var c = el("button","chip", pair[1]+" "+pair[0]);
+        c.addEventListener("click", function(){ onSelectPersonalColor(pair[0]); });
+        pwrap.appendChild(c);
+      });
+      var skipP = el("button","chip","わからない・スキップ");
+      skipP.addEventListener("click", function(){ onSelectPersonalColor(null); });
+      pwrap.appendChild(skipP);
+      return pwrap;
+    }
+    if(entry.type === "fashion-upload-prompt"){
+      var uwrap = el("div","chip-row");
+      uwrap.style.paddingLeft = "0";
+      var label = entry.mode === "today" ? "スクショ・写真をアップロード" : "参考画像をアップロード";
+      var ubtn = el("button","chip primary", label);
+      ubtn.addEventListener("click", function(){
+        byId(entry.mode === "today" ? "fileFashionToday" : "fileFashionReference").click();
+      });
+      uwrap.appendChild(ubtn);
+      return uwrap;
+    }
+    if(entry.type === "fashion-owned-color-chips"){
+      var owrap = el("div","chip-row");
+      owrap.style.paddingLeft = "0";
+      var selArr = entry.kind === "top" ? state.fashionOwnedTops : state.fashionOwnedBottoms;
+      FASHION_COLOR_LIST.forEach(function(color){
+        var c = el("button","chip" + (selArr.indexOf(color)!==-1 ? " selected":""), color);
+        c.addEventListener("click", function(){ onToggleOwnedColor(entry.kind, color); });
+        owrap.appendChild(c);
+      });
+      return owrap;
+    }
+    if(entry.type === "fashion-advice"){
+      var awrap = el("div","bubble-row");
+      awrap.appendChild(el("div","avatar-ai","服"));
+      var abub = el("div","bubble ai");
+      var atext = document.createElement("div");
+      atext.style.whiteSpace = "pre-line";
+      atext.innerHTML = entry.html;
+      abub.appendChild(atext);
+      var abtnRow = el("div","btn-row");
+      var copyBtn = el("button","mini-btn selected","📋 コピー");
+      copyBtn.addEventListener("click", function(){ copyFashionText(entry.rawText); });
+      abtnRow.appendChild(copyBtn);
+      if(entry.extra === "detail"){
+        var detailBtn = el("button","mini-btn","📝 詳細アドバイス");
+        detailBtn.addEventListener("click", function(){ onRequestFashionDetail(); });
+        abtnRow.appendChild(detailBtn);
+      }else if(entry.extra === "check"){
+        var checkBtn2 = el("button","mini-btn","👕 ファッションチェック");
+        checkBtn2.addEventListener("click", function(){ onChooseFashionMode("check"); });
+        abtnRow.appendChild(checkBtn2);
+      }
+      abub.appendChild(abtnRow);
+      awrap.appendChild(abub);
+      return awrap;
+    }
+    if(entry.type === "fashion-detail"){
+      var dwrap = el("div","bubble-row");
+      dwrap.appendChild(el("div","avatar-ai","服"));
+      var dbub = el("div","bubble ai");
+      var dtext = document.createElement("div");
+      dtext.style.whiteSpace = "pre-line";
+      dtext.innerHTML = entry.html;
+      dbub.appendChild(dtext);
+      var dbtnRow = el("div","btn-row");
+      var dcopyBtn = el("button","mini-btn selected","📋 コピー");
+      dcopyBtn.addEventListener("click", function(){ copyFashionText(entry.rawText); });
+      dbtnRow.appendChild(dcopyBtn);
+      var restartBtn = el("button","mini-btn","🔁 別の相談をする");
+      restartBtn.addEventListener("click", function(){
+        resetFashionFlow();
+        render();
+      });
+      dbtnRow.appendChild(restartBtn);
+      dbub.appendChild(dbtnRow);
+      dwrap.appendChild(dbub);
+      return dwrap;
+    }
+    if(entry.type === "restaurant-category-prompt"){
+      var catWrap = el("div","chip-row");
+      catWrap.style.paddingLeft = "0";
+      [["restaurant","レストラン"],["cafe","カフェ"]].forEach(function(pair){
+        var c = el("button","chip",pair[1]);
+        c.addEventListener("click", function(){ onPickRestaurantCategory(pair[0]); });
+        catWrap.appendChild(c);
+      });
+      return catWrap;
+    }
+    if(entry.type === "restaurant-location-prompt"){
+      var locWrap = el("div","chip-row");
+      locWrap.style.paddingLeft = "0";
+      RESTAURANT_LOCATION_OPTIONS.forEach(function(loc){
+        var c = el("button","chip",loc);
+        c.addEventListener("click", function(){ onPickRestaurantLocation(loc); });
+        locWrap.appendChild(c);
+      });
+      return locWrap;
+    }
+    if(entry.type === "restaurant-mealtime-prompt"){
+      var mealWrap = el("div","chip-row");
+      mealWrap.style.paddingLeft = "0";
+      [["lunch","ランチ"],["dinner","ディナー"]].forEach(function(pair){
+        var c = el("button","chip",pair[1]);
+        c.addEventListener("click", function(){ onPickRestaurantMealtime(pair[0]); });
+        mealWrap.appendChild(c);
+      });
+      return mealWrap;
+    }
+    if(entry.type === "restaurant-budget-prompt"){
+      var budgetOuter = el("div","");
+      var bWrap = el("div","chip-row");
+      bWrap.style.paddingLeft = "0";
+      var okBtn = el("button","chip primary","この予算でOK（"+entry.defaultLabel+"）");
+      okBtn.addEventListener("click", function(){ onAcceptDefaultBudget(entry.defaultLabel); });
+      bWrap.appendChild(okBtn);
+      budgetOuter.appendChild(bWrap);
+      var hint = document.createElement("div");
+      hint.style.marginTop = "6px";
+      hint.style.fontSize = "12px";
+      hint.style.color = "var(--ink-faint)";
+      hint.textContent = "※予算は一人当たりです。※「7000円くらい」「もっと高め」のように、下の入力欄から具体的な希望も送れます。";
+      budgetOuter.appendChild(hint);
+      return budgetOuter;
+    }
+    if(entry.type === "restaurant-result"){
+      var rWrap = el("div","catalog-wrap");
+      var badgeLabel = entry.grounded ? "Google検索連携で確認済み" : "AI提案（詳細情報は要確認です。ご予約前に店舗へご確認ください。）";
+      var badge = el("span","mock-badge", ICONS.sparkle + ' <span>'+badgeLabel+'</span>');
+      badge.style.display = "inline-flex";
+      badge.style.alignItems = "center";
+      badge.querySelector("svg").style.marginRight = "3px";
+      rWrap.appendChild(badge);
+
+      var spots = entry.spots || [];
+      spots.forEach(function(spot){
+        var card = el("div","info-card");
+        var hue = hueFromString(spot.name);
+        var swatch = el("div","swatch");
+        swatch.style.background = "hsl("+hue+",30%,45%)";
+        swatch.innerHTML = ICONS.restaurant;
+        card.appendChild(swatch);
+        var body = el("div","body");
+        var candidateSelected = state.dateCandidates.indexOf(spot.name) !== -1;
+        var tipsHtml = (spot.dateTips||[]).map(function(t){ return '<div class="tag" style="display:block;margin-top:4px;">💡 '+t+'</div>'; }).join('');
+        body.innerHTML =
+          '<div class="title-row"><span class="title">'+spot.name+'</span><span style="font-size:11px;color:var(--ink-faint);">'+(spot.area||"")+'</span></div>'+
+          '<div class="desc">'+(spot.desc||"")+'</div>'+
+          tipsHtml;
+        var btn = el("button","mini-btn" + (candidateSelected?" selected":""), candidateSelected ? "候補に追加済み" : "候補に入れる");
+        btn.style.marginTop = "9px";
+        btn.addEventListener("click", function(){
+          if(state.dateCandidates.indexOf(spot.name)===-1){
+            state.dateCandidates.push(spot.name);
+            toast("オーダーシートのメモに追加しました。");
+          }else{
+            state.dateCandidates = state.dateCandidates.filter(function(n){ return n!==spot.name; });
+          }
+          saveState();
+          render();
+        });
+        body.appendChild(btn);
+        card.appendChild(body);
+        rWrap.appendChild(card);
+      });
+      if(spots.length===0){
+        rWrap.appendChild(emptyState("条件に合うお店が見つかりませんでした。エリアや予算を変えて、下の入力欄から再度相談してみてください。", ICONS.restaurant));
+      }
+      return rWrap;
     }
     return el("div","");
   }
@@ -1361,7 +1717,9 @@
     var text = input.value.trim();
     if(!text) return;
     input.value = "";
-    submitQuickText(text);
+    if(state.tab === "fashion") submitFashionText(text);
+    else if(state.tab === "restaurant") submitRestaurantFreeText(text);
+    else submitQuickText(text);
   }
 
   // メニューのボタン（既定の選択肢）やフリー入力のテキストを、その場で送信・実行する共通処理
@@ -1393,6 +1751,19 @@
   }
 
   // 自撮りによる顔型診断
+  // 生成した仕上がりイメージのアップロード（ブラウザ内のみで表示、サーバーには送信しない）
+  byId("fileGeneratedImage").addEventListener("change", function(e){
+    var file = e.target.files && e.target.files[0];
+    if(!file) return;
+    fileToDataUrl(file).then(function(dataUrl){
+      state.generatedImage = dataUrl;
+      saveState();
+      toast("画像を読み込みました");
+      render();
+    });
+    e.target.value = "";
+  });
+
   byId("fileFaceShape").addEventListener("change", function(e){
     var file = e.target.files && e.target.files[0];
     if(!file) return;
@@ -1444,8 +1815,6 @@
   }
 
   function goToOrder(style){ state.tab="order"; state.seenOrderBadge = true; saveState(); render(); }
-  function goToFashion(style){ state.tab="fashion"; state.seenFashionBadge = true; saveState(); render(); }
-  function goToRestaurant(style){ state.tab="restaurant"; state.seenRestaurantBadge = true; saveState(); render(); }
 
   // スクリーンショット送信
   byId("fileScreenshot").addEventListener("change", function(e){
@@ -1459,7 +1828,7 @@
       analyzeScreenshot(dataUrl).then(function(result){
         // typingを除去
         state.chat.log = state.chat.log.filter(function(x){ return x.type!=="typing"; });
-        pushLog({ type:"ai", text:"画像を解析しました。近いスタイルはこちらです：" });
+        pushLog({ type:"ai", text:"写真から髪型の特徴を分析しました。検出結果はこちらです：" });
         pushLog({ type:"analysis-badge", mock: result.mock !== false });
         pushLog({ type:"confirm", styleId: result.style.id, styleObj: result.style });
         state.selectedStyle = result.style;
@@ -1484,6 +1853,14 @@
     byId("attachMenu").classList.remove("open");
     byId("fileScreenshot").click();
   });
+  byId("attachFashionTodayBtn").addEventListener("click", function(){
+    byId("attachMenu").classList.remove("open");
+    byId("fileFashionToday").click();
+  });
+  byId("attachFashionReferenceBtn").addEventListener("click", function(){
+    byId("attachMenu").classList.remove("open");
+    byId("fileFashionReference").click();
+  });
   document.addEventListener("click", function(e){
     var menu = byId("attachMenu");
     if(!menu.classList.contains("open")) return;
@@ -1497,104 +1874,629 @@
 
   /* =========================================================
      8. ファッションアドバイザー
+     -----------------------------------------------------------
+     ヘアタブと同じ「チャット + ログ描画」方式。
+     画像解析（今日のコーデ／参考画像）は現状モックで、
+     実際のGemini API連携は今後の差し替えポイント。
   ========================================================= */
-  function renderFashionTab(screen){
-    if(!state.selectedStyle){
-      screen.appendChild(emptyState("まずは「ヘア」タブで髪型を決めましょう。決定した髪型に合わせて、最適なコーディネートをご提案します。", ICONS.fashion, "髪型を選びに行く", function(){ state.tab="hair"; render(); }));
-      return;
+  var FASHION_COLOR_LIST = ['ブラック','ネイビー','グレー','ベージュ','アイボリー','ブラウン','カーキ','ホワイト'];
+  var FASHION_MENS_TOPS = ['スーツジャケット','Tシャツ','ポロシャツ','シャツ','ニット'];
+  var FASHION_MENS_BOTTOMS = ['スラックス','デニムパンツ','チノパン','ワイドパンツ'];
+  var FASHION_MENS_JEWELRY = ['シルバーのブレスレット','レザーブレスレットひとつ','さりげない腕時計'];
+  var FASHION_LADIES_TOPS = ['ブラウス','ニット','シャツ','ワンピース','カーディガン'];
+  var FASHION_LADIES_BOTTOMS = ['スカート','ワイドパンツ','スラックス','デニム'];
+  var FASHION_LADIES_JEWELRY = ['華奢なネックレス一本','パールの一粒ピアス','存在感のあるバングルひとつ'];
+  var FASHION_MENS_BASE = ['ユニクロのタックワイドパンツ','GUのリラックスシャツ','無印良品のリネンジャケット','バナナ・リパブリックのシルクコットンニット','niko and...のオーバーシャツ'];
+  var FASHION_MENS_ACC  = ['エルメスのレザーベルト','ティファニーのシルバーブレスレット','トムフォードのサングラス'];
+  var FASHION_LADIES_BASE = ['ユニクロのプレミアムリネンシャツ','ZARAのハイウエストスラックス','GUのニットワンピース','無印良品のコットンワンピース','niko and...のドレープカーディガン'];
+  var FASHION_LADIES_ACC  = ['エルメスのスカーフ','シャネルのチェーンバッグ','ティファニーのネックレス','CELINEのレザーバッグ'];
+
+  // 🔧 差し替えポイント：色の組み合わせ判定は本番ではAI（Gemini/Claude）による都度判定に置き換える
+  var FASHION_COMBOS = [
+    {combo:'ネイビー×グレー', comment:'知的でシックな配色。同系の寒色でまとめると大人の落ち着きが際立ちます。',
+     shoe:'黒でまとめがちなところを白系のスニーカーやレザーシューズに変えると、抜け感が出て今っぽい印象になります。'},
+    {combo:'ベージュ×アイボリー', comment:'ワントーンでまとめた上品な抜け感コーデ。ツヤや起毛感のある上質な素材を選ぶと安っぽく見えません。',
+     shoe:'同系色のローファーやパンプスで繋げると、脚のラインがすっきり長く見えます。'},
+    {combo:'ブラウン×カーキ', comment:'落ち着いたアースカラーの組み合わせ。イエベ系の肌に馴染みやすく、大人の余裕を感じさせます。',
+     shoe:'黒よりブラウン系の革靴やブーツにすると、全体に一体感が出ます。'},
+    {combo:'ホワイト×ネイビー', comment:'清潔感のある爽やかな配色。きれいめにもカジュアルにも寄せやすい万能な組み合わせです。',
+     shoe:'この配色には白のレザースニーカーが最も相性良く映えます。'},
+    {combo:'ブラック×グレー', comment:'モードで引き締まった印象になりますが、重く見えがちな配色でもあります。',
+     shoe:'差し色として明るめのグレーやシルバー系の靴を選ぶと、抜け感と軽さが加わります。'},
+    {combo:'ブラック×ネイビー', comment:'色味が近いようで実は同系色ではないため、光の当たり方によって配色ミスのようにちぐはぐに見えやすい組み合わせです。',
+     shoe:'靴まで黒や紺で揃えると余計に沈むので、ブラウンやキャメルなど温かみのある差し色を選ぶと救われます。'}
+  ];
+
+  function fashionPick(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
+  function findFashionCombo(topColor, bottomColor){
+    for(var i=0;i<FASHION_COMBOS.length;i++){
+      if(FASHION_COMBOS[i].combo === topColor+'×'+bottomColor || FASHION_COMBOS[i].combo === bottomColor+'×'+topColor) return FASHION_COMBOS[i];
     }
-    var style = state.selectedStyle;
-    screen.appendChild(introCard(
-      "選択中の髪型「"+style.name+"」に似合う、婚活・デート向けコーディネートをご提案します。",
-      style
-    ));
-    screen.appendChild(el("div","section-label","おすすめコーディネート"));
-    var list = OUTFITS[style.gender];
-    list.forEach(function(o){
-      var card = el("div","info-card");
-      var hue = hueFromString(o.name);
-      var swatch = el("div","swatch");
-      swatch.style.background = "hsl("+hue+",42%,52%)";
-      swatch.innerHTML = ICONS.fashion;
-      card.appendChild(swatch);
-      var body = el("div","body");
-      var selected = state.outfit === o.name;
-      body.innerHTML =
-        '<div class="title-row"><span class="title">'+o.name+'</span></div>'+
-        '<div class="desc">'+o.desc+'</div>'+
-        '<div class="tags">'+o.tags.map(function(t){return '<span class="tag">'+t+'</span>';}).join('')+'</div>';
-      var btn = el("button","mini-btn" + (selected ? " selected":""), selected ? "選択中" : "このコーデにする");
-      btn.style.marginTop = "9px";
-      btn.addEventListener("click", function(){
-        state.outfit = o.name;
-        saveState();
-        toast("コーデを保存しました。オーダーシートに反映されます。");
-        render();
+    return null;
+  }
+  function genericFashionCombo(topColor, bottomColor){
+    return {
+      combo: topColor+'×'+bottomColor,
+      comment: '新しい配色ですね。近いトーンでまとめると統一感が出て、離れたトーンだとメリハリが出ます。',
+      shoe: '色のコントラストに合わせて、靴を差し色にするか同系色でまとめるかを選ぶとバランスが取りやすいです。'
+    };
+  }
+  function fashionFinishTip(){
+    return state.gender === "men"
+      ? '腕まくりは肘上5cmくらいで折り返すと、こなれ感と品の良さが両立します。眼鏡やベルトなど、小物は一点だけ強めに効かせるのがコツです。'
+      : '首元や手首にジュエリーを一点添えると、シンプルな服も一気に上質に見えます。艶感のあるヘアと血色感のあるメイクを添えると完成度が上がります。';
+  }
+  function fashionColorNote(){
+    return state.fashionPersonalColor ? state.fashionPersonalColor+'の診断結果をふまえると、' : '';
+  }
+  function fashionPlainText(html){
+    return html.replace(/<br\s*\/?>/gi,'\n').replace(/<[^>]+>/g,'').replace(/&nbsp;/g,' ').replace(/\n{3,}/g,'\n\n').trim();
+  }
+  function copyFashionText(text){
+    if(!text) return;
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(text).then(function(){
+        toast("コピーしました！LINEなどに貼り付けてください");
+      }).catch(function(){
+        toast(fallbackCopyText(text) ? "コピーしました！LINEなどに貼り付けてください" : "コピーできませんでした。手動で選択してコピーしてください");
       });
-      body.appendChild(btn);
-      card.appendChild(body);
-      screen.appendChild(card);
-    });
+    }else{
+      toast(fallbackCopyText(text) ? "コピーしました！LINEなどに貼り付けてください" : "コピーできませんでした。手動で選択してコピーしてください");
+    }
   }
 
-  /* =========================================================
-     9. レストランアドバイザー
-  ========================================================= */
-  var restaurantFilters = [];
-  function renderRestaurantTab(screen){
-    screen.appendChild(el("div","section-label","婚活・デート向け検索条件"));
-    var allTags = ["横並びカウンター席あり","静かな個室","初デート向けカフェ・ラウンジ"];
-    var filterRow = el("div","filter-row");
-    allTags.forEach(function(tag){
-      var active = restaurantFilters.indexOf(tag) !== -1;
-      var chip = el("button","chip" + (active?" selected":""), tag);
-      chip.addEventListener("click", function(){
-        var pos = restaurantFilters.indexOf(tag);
-        if(pos===-1) restaurantFilters.push(tag); else restaurantFilters.splice(pos,1);
-        render();
-      });
-      filterRow.appendChild(chip);
-    });
-    screen.appendChild(filterRow);
+  function pushFashion(entry){ state.fashionChat.log.push(entry); saveState(); }
 
-    var results = RESTAURANTS.filter(function(r){
-      if(restaurantFilters.length===0) return true;
-      return restaurantFilters.every(function(f){ return r.tags.indexOf(f)!==-1; });
-    });
-
-    screen.appendChild(el("div","section-label", results.length + "件のお店"));
-    results.forEach(function(r){
-      var card = el("div","info-card");
-      var hue = hueFromString(r.name);
-      var swatch = el("div","swatch");
-      swatch.style.background = "hsl("+hue+",30%,45%)";
-      swatch.innerHTML = ICONS.restaurant;
-      card.appendChild(swatch);
-      var body = el("div","body");
-      var candidateSelected = state.dateCandidates.indexOf(r.name) !== -1;
-      body.innerHTML =
-        '<div class="title-row"><span class="title">'+r.name+'</span><span style="font-size:11px;color:var(--ink-faint);">'+r.area+'</span></div>'+
-        '<div class="desc">'+r.desc+'</div>'+
-        '<div class="tags">'+r.tags.map(function(t){return '<span class="tag">'+t+'</span>';}).join('')+'</div>';
-      var btn = el("button","mini-btn" + (candidateSelected?" selected":""), candidateSelected ? "候補に追加済み" : "候補に入れる");
-      btn.style.marginTop = "9px";
-      btn.addEventListener("click", function(){
-        if(state.dateCandidates.indexOf(r.name)===-1){
-          state.dateCandidates.push(r.name);
-          toast("オーダーシートのメモに追加しました。");
-        }else{
-          state.dateCandidates = state.dateCandidates.filter(function(n){ return n!==r.name; });
-        }
-        saveState();
-        render();
-      });
-      body.appendChild(btn);
-      card.appendChild(body);
-      screen.appendChild(card);
-    });
-    if(results.length===0){
-      screen.appendChild(emptyState("条件に合うお店が見つかりませんでした。条件を減らしてお試しください。", ICONS.restaurant));
+  function ensureFashionGreeting(){
+    if(!state.fashionChat.started){
+      state.fashionChat.started = true;
+      pushFashion({ type:"ai", text:"スクアドファッションへようこそ！\n相談内容を入力してください。" });
+      pushFashion({ type:"fashion-mode-choice" });
     }
+  }
+
+  // ファッションの会話・選択結果を最初からやり直すための共通リセット処理
+  function resetFashionFlow(){
+    state.fashionChat = { started:false, log:[] };
+    state.fashionMode = null;
+    state.fashionTaste = null;
+    state.fashionPersonalColor = null;
+    state.fashionOwnedTops = [];
+    state.fashionOwnedBottoms = [];
+    state.fashionDiagnosis = null;
+    state.fashionLastAdviceType = null;
+    state.fashionLastAdvice = null;
+    state.fashionLastDetailText = null;
+    saveState();
+  }
+
+  function renderFashionTab(screen){
+    ensureFashionGreeting();
+    var timeline = el("div","");
+    timeline.style.display = "flex";
+    timeline.style.flexDirection = "column";
+    timeline.style.gap = "12px";
+    state.fashionChat.log.forEach(function(entry, idx){
+      timeline.appendChild(renderChatEntry(entry, idx, "服"));
+    });
+    screen.appendChild(timeline);
+    screen.scrollTop = screen.scrollHeight;
+  }
+
+  function onChooseFashionMode(mode){
+    pushFashion({ type:"user", text: mode === "check" ? "ファッションチェック" : "色コーデ" });
+    state.fashionMode = mode;
+    saveState();
+    if(mode === "check"){
+      pushFashion({ type:"ai", text:"今日の服装や気になる着こなしのスクショ・写真をアップロードしてください" });
+      pushFashion({ type:"fashion-upload-prompt", mode:"today" });
+    }else{
+      pushFashion({ type:"ai", text:"好みのテイストを教えてください。" });
+      pushFashion({ type:"fashion-taste-chips" });
+    }
+    render();
+  }
+
+  function onSelectFashionTaste(val){
+    state.fashionTaste = val;
+    saveState();
+    pushFashion({ type:"user", text: val || "スキップ" });
+    pushFashion({ type:"ai", text:"参考までに、パーソナルカラー診断の結果がわかれば教えてください（必須ではありません）。" });
+    pushFashion({ type:"fashion-color-chips" });
+    render();
+  }
+
+  function onSelectPersonalColor(val){
+    state.fashionPersonalColor = val;
+    saveState();
+    pushFashion({ type:"user", text: val || "わからない・スキップ" });
+    askFashionOwnedColors();
+    render();
+  }
+
+  function askFashionOwnedColors(){
+    state.fashionOwnedTops = [];
+    state.fashionOwnedBottoms = [];
+    saveState();
+    pushFashion({ type:"ai", text:"お持ちの服もしくはこれから着たいトップスの色は？" });
+    pushFashion({ type:"fashion-owned-color-chips", kind:"top" });
+  }
+
+  function onToggleOwnedColor(kind, color){
+    var arr = kind === "top" ? state.fashionOwnedTops : state.fashionOwnedBottoms;
+    var i = arr.indexOf(color);
+    if(i !== -1){
+      arr.splice(i,1);
+      saveState();
+      render();
+      return;
+    }
+    if(arr.length >= 2){
+      toast("2つまで選べます");
+      return;
+    }
+    arr.push(color);
+    saveState();
+    if(arr.length === 2){
+      if(kind === "top"){
+        pushFashion({ type:"user", text: state.fashionOwnedTops.join("・") });
+        pushFashion({ type:"ai", text:"お持ちの服もしくはこれから着たいボトムスの色は？" });
+        pushFashion({ type:"fashion-owned-color-chips", kind:"bottom" });
+        render();
+      }else{
+        pushFashion({ type:"user", text: state.fashionOwnedBottoms.join("・") });
+        pushFashion({ type:"typing" });
+        render();
+        setTimeout(function(){
+          state.fashionChat.log = state.fashionChat.log.filter(function(x){ return x.type!=="typing"; });
+          pushFashion({ type:"fashion-advice", html: buildFashionCoordinateRecommendation(), rawText: state.fashionLastAdvice ? state.fashionLastAdvice.rawText : "", extra:"check" });
+          render();
+        }, 900);
+      }
+    }else{
+      render();
+    }
+  }
+
+  function scoreFashionColorPair(top, bottom){
+    var found = findFashionCombo(top, bottom);
+    if(!found) return { score:1, info: genericFashionCombo(top, bottom) };
+    if(found.combo === 'ブラック×ネイビー') return { score:0, info: found };
+    return { score:2, info: found };
+  }
+
+  // 🔧 差し替えポイント：本番ではこの組み合わせ判定をAI（Gemini/Claude）に置き換える
+  function buildFashionCoordinateRecommendation(){
+    var pairs = [];
+    state.fashionOwnedTops.forEach(function(top){
+      state.fashionOwnedBottoms.forEach(function(bottom){
+        var r = scoreFashionColorPair(top, bottom);
+        pairs.push({ top:top, bottom:bottom, score:r.score, info:r.info });
+      });
+    });
+    pairs.sort(function(a,b){ return b.score - a.score; });
+    var best = pairs[0], second = pairs[1];
+
+    state.fashionDiagnosis = {
+      top:"トップス", bottom:"ボトムス", topColor:best.top, bottomColor:best.bottom,
+      jewelry: fashionPick(state.gender === "men" ? FASHION_MENS_JEWELRY : FASHION_LADIES_JEWELRY)
+    };
+    state.fashionLastAdviceType = "coordinate";
+    state.outfit = best.top+"×"+best.bottom;
+    saveState();
+
+    var html =
+      "お持ちの色を拝見しました！<br><br>"+
+      "🥇 <b>"+best.top+"×"+best.bottom+"</b>が一番のおすすめです。"+best.info.comment+"<br><br>"+
+      (second ? ("🥈 次点では <b>"+second.top+"×"+second.bottom+"</b> も良い組み合わせです。<br><br>") : "")+
+      "👟 <b>靴のアドバイス</b>："+best.info.shoe+"<br><br>"+
+      fashionFinishTip();
+    state.fashionLastAdvice = { rawText: fashionPlainText(html), combo: best.info };
+    saveState();
+    return html;
+  }
+
+  // 今日のコーデ診断データを生成する（表示用の短いメッセージは作らず、そのまま詳細アドバイスに使う）
+  function generateFashionCheckDiagnosis(){
+    var top = fashionPick(state.gender === "men" ? FASHION_MENS_TOPS : FASHION_LADIES_TOPS);
+    var bottom = fashionPick(state.gender === "men" ? FASHION_MENS_BOTTOMS : FASHION_LADIES_BOTTOMS);
+    var jewelry = fashionPick(state.gender === "men" ? FASHION_MENS_JEWELRY : FASHION_LADIES_JEWELRY);
+    var c = fashionPick(FASHION_COMBOS);
+    var parts = c.combo.split('×');
+    state.fashionDiagnosis = { top:top, bottom:bottom, topColor:parts[0], bottomColor:parts[1], jewelry:jewelry };
+    state.fashionLastAdviceType = "today";
+    state.outfit = top+"×"+bottom;
+    saveState();
+  }
+
+  function buildFashionReferenceAdviceHtml(){
+    var base = fashionPick(state.gender === "men" ? FASHION_MENS_BASE : FASHION_LADIES_BASE);
+    var acc  = fashionPick(state.gender === "men" ? FASHION_MENS_ACC : FASHION_LADIES_ACC);
+    var c = fashionPick(FASHION_COMBOS);
+    var taste = state.fashionTaste || "きれいめ";
+    state.fashionLastAdviceType = "reference";
+    state.outfit = base;
+    saveState();
+    var html =
+      "アップロードいただいた画像を拝見しました。抽出したイメージはこちらです。<br>"+
+      '<span class="tag">テイスト：'+taste+'</span> <span class="tag">カラー系統：'+c.combo+'</span> <span class="tag">印象：抜け感あり</span><br><br>'+
+      "ベースには <b>"+base+"</b> を、アクセントには <b>"+acc+"</b> を合わせると近いイメージが作れます。<br><br>"+
+      fashionColorNote()+c.comment+"<br><br>"+
+      "👟 <b>靴のアドバイス</b>："+c.shoe+"<br><br>"+
+      fashionFinishTip();
+    state.fashionLastAdvice = { rawText: fashionPlainText(html), combo: c };
+    saveState();
+    return html;
+  }
+
+  function onRequestFashionDetail(){
+    pushFashion({ type:"user", text:"詳細アドバイスをお願いします" });
+    pushFashion({ type:"typing" });
+    render();
+    setTimeout(function(){
+      state.fashionChat.log = state.fashionChat.log.filter(function(x){ return x.type!=="typing"; });
+      var html = buildFashionDetailAdviceHtml();
+      pushFashion({ type:"fashion-detail", html: html, rawText: state.fashionLastDetailText });
+      render();
+    }, 900);
+  }
+
+  function buildFashionDetailAdviceHtml(){
+    var d = state.fashionDiagnosis || { top:"トップス", bottom:"ボトムス", topColor:"ネイビー", bottomColor:"グレー" };
+    var c = findFashionCombo(d.topColor, d.bottomColor) || genericFashionCombo(d.topColor, d.bottomColor);
+    var accList = state.gender === "men" ? FASHION_MENS_ACC : FASHION_LADIES_ACC;
+    var baseList = state.gender === "men" ? FASHION_MENS_BASE : FASHION_LADIES_BASE;
+    var acc1 = fashionPick(accList), acc2 = fashionPick(accList), outer = fashionPick(baseList);
+    var html =
+      "非常に洗練された色合わせです！"+d.topColor+"の"+d.top+"に、"+d.bottomColor+"系"+d.bottom+"の組み合わせは、大人の落ち着きと品格を醸し出せる鉄板の配色です。<br>"+
+      "この上下の色のコントラストは視線を縦に引っ張るため、スタイルアップ効果が高く、非常にスマートに見えます。<br>"+
+      "このベースコーディネートをさらに「格上げ」し、ハイブランド小物を活かすためのスタイリング指南を提案します。<br><br>"+
+      "<b>1. この組み合わせの魅力とポイント</b><br>"+
+      "・カラーリング："+d.topColor+"×"+d.bottomColor+"（"+c.comment+"）<br>"+
+      "・素材感のギャップ："+d.top+"のスムースな質感と、"+d.bottom+"の表情のある素材感が立体感を生んでいます。<br><br>"+
+      "<b>2.「ハイ＆ロー」格上げ＆着こなしアドバイス</b><br>"+
+      "<b>① ジュエリー・小物の合わせ方</b><br>"+
+      "・腕元："+acc1+"を差すと、シンプルな"+d.top+"姿が一気に洗練されます。<br>"+
+      "・小物："+acc2+"をさりげなく効かせると、全体に重厚感と上質さがプラスされます。<br>"+
+      "・靴："+c.shoe+"<br><br>"+
+      "<b>② シルエット・着こなしのコツ</b><br>"+
+      "・"+d.top+"の裾を軽くタックイン（ハーフイン）すると、腰位置が上がりスタイルが良く見えます。<br>"+
+      "・袖を1回だけ軽くロールアップすると、腕元の小物が美しく際立ちます。<br><br>"+
+      "<b>3. シーン別のおすすめアウター＆アレンジ</b><br>"+
+      "・【少し背伸びしたレストラン・キレイめシーン】プラス1アイテムとして"+outer+"を羽織り、小物を一点効かせるとラグジュアリーな雰囲気に。<br>"+
+      "・【休日カフェ巡り・リラックスシーン】羽織りをプラスして袖を捲り、足元は白スニーカーや上質なサンダルで軽快に。<br><br>"+
+      "ベースが非常に優秀で上品な組み合わせですので、自信を持って着用していただけます！アクセサリーやアウターの組み合わせでご質問があれば、いつでもお尋ねください。";
+    state.fashionLastDetailText = fashionPlainText(html);
+    saveState();
+    return html;
+  }
+
+  // ---- 訂正文の検出（上下の種類・色）----
+  var FASHION_ALL_TOPS = ['スーツジャケット','Tシャツ','ポロシャツ','シャツ','ニット','セーター','ブラウス','ワンピース','カーディガン'];
+  var FASHION_ALL_BOTTOMS = ['スラックス','デニムパンツ','チノパン','ワイドパンツ','スカート','デニム','ズボン','パンツ'];
+  var FASHION_COLOR_MAP = {'黒':'ブラック','紺':'ネイビー','白':'ホワイト','ネイビー':'ネイビー','ブラック':'ブラック','ホワイト':'ホワイト','グレー':'グレー','ベージュ':'ベージュ','アイボリー':'アイボリー','ブラウン':'ブラウン','カーキ':'カーキ'};
+
+  function detectFashionCorrection(text){
+    var foundTop = FASHION_ALL_TOPS.filter(function(k){ return text.indexOf(k)!==-1; })[0];
+    var foundBottom = FASHION_ALL_BOTTOMS.filter(function(k){ return text.indexOf(k)!==-1; })[0];
+    var negMatch = text.match(/(?:じゃなくて|ではなく|じゃなく)(.+)/);
+    var searchTarget = negMatch ? negMatch[1] : text;
+    var foundColorKey = Object.keys(FASHION_COLOR_MAP).filter(function(k){ return searchTarget.indexOf(k)!==-1; })[0];
+    if(!foundColorKey) foundColorKey = Object.keys(FASHION_COLOR_MAP).filter(function(k){ return text.indexOf(k)!==-1; })[0];
+    if(!foundTop && !foundBottom && !foundColorKey) return null;
+    return { top: foundTop||null, bottom: foundBottom||null, color: foundColorKey ? FASHION_COLOR_MAP[foundColorKey] : null };
+  }
+  function applyFashionCorrection(corr){
+    var d = state.fashionDiagnosis;
+    if(!d) return;
+    if(corr.top) d.top = corr.top;
+    if(corr.bottom) d.bottom = corr.bottom;
+    if(corr.color){
+      if(corr.top) d.topColor = corr.color;
+      else if(corr.bottom) d.bottomColor = corr.color;
+      else d.topColor = corr.color;
+    }
+    saveState();
+  }
+
+  // ---- 天気・気温・日差しなどのキーワード検出 ----
+  // 🔧 差し替えポイント：本番では天気API/位置情報＋AIによる判定に置き換える
+  var FASHION_WEATHER_ADVICE = [
+    { keywords:['暑い','猛暑','真夏日','蒸し暑い','気温が高い','30度','35度'],
+      advice:'気温が高くなりそうですね🌞\n半袖や、リネン・コットンなど通気性の良い素材がおすすめです。汗ジミが気になる方は、濃いめの色か速乾素材を選ぶと安心です。' },
+    { keywords:['寒い','冷え込む','氷点下','気温が低い','雪'],
+      advice:'気温が下がりそうですね❄️\nニットやアウターを一枚プラスして、首・手首・足首の「三つの首」を温めると体感がぐっと変わります。' },
+    { keywords:['日差し','紫外線','uv'],
+      advice:'日差しが強そうですね☀️\nラッシュガードや薄手の長袖羽織りで紫外線対策をすると安心です。帽子やサングラスも効果的です。' },
+    { keywords:['雨','梅雨','降水'],
+      advice:'雨の予報ですね☔\n撥水素材のアウターや、濡れても目立ちにくい色・乾きやすい素材を選ぶと快適に過ごせます。' }
+  ];
+  function detectFashionWeatherAdvice(text){
+    var lower = text.toLowerCase();
+    var hit = FASHION_WEATHER_ADVICE.filter(function(w){
+      return w.keywords.some(function(k){ return lower.indexOf(k)!==-1; });
+    })[0];
+    return hit ? hit.advice : null;
+  }
+
+  // ---- 挨拶・お礼などの雑談 ----
+  var FASHION_GREETING_KEYWORDS = ['こんにちは','こんばんは','おはよう','はじめまして','よろしく','やあ','こんにちわ'];
+  var FASHION_THANKS_KEYWORDS = ['ありがとう','thanks','thank you','助かる','感謝','たすかる'];
+  function detectFashionSmallTalk(text){
+    var lower = text.toLowerCase();
+    if(FASHION_GREETING_KEYWORDS.some(function(k){ return lower.indexOf(k)!==-1; })){
+      return 'こんにちは！今日もおしゃれ楽しみましょう😊 気になることがあれば何でも聞いてください。';
+    }
+    if(FASHION_THANKS_KEYWORDS.some(function(k){ return lower.indexOf(k)!==-1; })){
+      return 'どういたしまして！また気になることがあれば、いつでも聞いてくださいね☺️';
+    }
+    return null;
+  }
+
+  // チャット入力欄（コンポーザー）からのファッション相談テキストを処理
+  function submitFashionText(text){
+    pushFashion({ type:"user", text: text });
+
+    if(state.fashionLastAdviceType === "today" && state.fashionDiagnosis){
+      var corr = detectFashionCorrection(text);
+      if(corr){
+        applyFashionCorrection(corr);
+        pushFashion({ type:"ai", text:"訂正ありがとうございます！内容を反映して見直しますね。" });
+        var correctedHtml = buildFashionDetailAdviceHtml();
+        pushFashion({ type:"fashion-detail", html: correctedHtml, rawText: state.fashionLastDetailText });
+        render();
+        return;
+      }
+    }
+
+    var smallTalk = detectFashionSmallTalk(text);
+    if(smallTalk){
+      pushFashion({ type:"ai", text: smallTalk });
+      render();
+      return;
+    }
+
+    var weatherAdvice = detectFashionWeatherAdvice(text);
+    if(weatherAdvice){
+      pushFashion({ type:"ai", text: weatherAdvice });
+      render();
+      return;
+    }
+
+    pushFashion({ type:"ai", text:"すみません、その内容だとうまくお答えできませんでした🙏\nファッションのご相談でしたら、下から選んでいただくとスムーズです。" });
+    pushFashion({ type:"fashion-mode-choice" });
+    render();
+  }
+
+  // 今日のコーデ（ファッションチェック）画像アップロード
+  byId("fileFashionToday").addEventListener("change", function(e){
+    var file = e.target.files && e.target.files[0];
+    if(!file) return;
+    fileToDataUrl(file).then(function(dataUrl){
+      pushFashion({ type:"user", text:"", thumb:dataUrl });
+      pushFashion({ type:"typing" });
+      render();
+      setTimeout(function(){
+        state.fashionChat.log = state.fashionChat.log.filter(function(x){ return x.type!=="typing"; });
+        generateFashionCheckDiagnosis();
+        var html = buildFashionDetailAdviceHtml();
+        pushFashion({ type:"fashion-detail", html:html, rawText: state.fashionLastDetailText });
+        render();
+      }, 1000);
+    });
+    e.target.value = "";
+  });
+
+  // 参考画像アップロード
+  byId("fileFashionReference").addEventListener("change", function(e){
+    var file = e.target.files && e.target.files[0];
+    if(!file) return;
+    fileToDataUrl(file).then(function(dataUrl){
+      pushFashion({ type:"user", text:"", thumb:dataUrl });
+      pushFashion({ type:"typing" });
+      render();
+      setTimeout(function(){
+        state.fashionChat.log = state.fashionChat.log.filter(function(x){ return x.type!=="typing"; });
+        var html = buildFashionReferenceAdviceHtml();
+        pushFashion({ type:"fashion-advice", html:html, rawText: state.fashionLastAdvice.rawText, extra:null });
+        render();
+      }, 1000);
+    });
+    e.target.value = "";
+  });
+
+  /* =========================================================
+     9. レストランアドバイザー（チャット形式）
+     固定の店舗データベースは持たず、ヒアリングした条件をもとに
+     /api/restaurant-recommend（Gemini API + Google検索連携）へ都度問い合わせる。
+  ========================================================= */
+  function pushRestaurantLog(entry){ state.restaurantChat.log.push(entry); saveState(); }
+
+  function ensureRestaurantGreeting(){
+    if(!state.restaurantChat.started){
+      state.restaurantChat.started = true;
+      pushRestaurantLog({ type:"ai", text:"デートにぴったりのお店を一緒に探しましょう！まずは、レストランとカフェ、どちらのイメージですか？" });
+      pushRestaurantLog({ type:"restaurant-category-prompt" });
+      state.restaurant.step = "category";
+      saveState();
+    }
+  }
+
+  // 性別・ヘア・ファッションのリセットと同じく、レストランの会話・ヒアリング条件を最初からやり直す
+  function resetRestaurantFlow(){
+    state.restaurantChat = { started:false, log:[] };
+    state.restaurant = {
+      step:null, category:null, mealtime:null,
+      location:null, budgetLabel:null, budgetNote:null, extraNote:null
+    };
+    saveState();
+  }
+
+  function renderRestaurantTab(screen){
+    ensureRestaurantGreeting();
+    var timeline = el("div","");
+    timeline.style.display = "flex";
+    timeline.style.flexDirection = "column";
+    timeline.style.gap = "12px";
+    state.restaurantChat.log.forEach(function(entry, idx){
+      timeline.appendChild(renderChatEntry(entry, idx, "店"));
+    });
+    screen.appendChild(timeline);
+    screen.scrollTop = screen.scrollHeight;
+  }
+
+  function onPickRestaurantCategory(cat){
+    pushRestaurantLog({ type:"user", text: cat==="restaurant" ? "レストラン" : "カフェ" });
+    state.restaurant.category = cat;
+    if(cat === "restaurant"){
+      pushRestaurantLog({ type:"ai", text:"ランチとディナー、どちらの想定ですか？" });
+      pushRestaurantLog({ type:"restaurant-mealtime-prompt" });
+      state.restaurant.step = "mealtime";
+      saveState();
+      render();
+    }else{
+      state.restaurant.mealtime = null;
+      saveState();
+      proceedToRestaurantLocationStep();
+    }
+  }
+
+  function onPickRestaurantMealtime(meal){
+    pushRestaurantLog({ type:"user", text: meal==="lunch" ? "ランチ" : "ディナー" });
+    state.restaurant.mealtime = meal;
+    saveState();
+    proceedToRestaurantLocationStep();
+  }
+
+  function proceedToRestaurantLocationStep(){
+    pushRestaurantLog({ type:"ai", text:"ありがとうございます！エリアを教えてください（駅名・エリア名・路線名など、わかる範囲でOKです）。下の入力欄からどうぞ。" });
+    pushRestaurantLog({ type:"restaurant-location-prompt" });
+    state.restaurant.step = "location";
+    saveState();
+    render();
+  }
+
+  // 🔧 差し替えポイント：よく使われるエリアが分かってきたら候補を調整・追加
+  var RESTAURANT_LOCATION_OPTIONS = ["東京駅","新宿駅","恵比寿駅","池袋駅","新橋駅","梅田","札幌","福岡","仙台","宮古島"];
+  function onPickRestaurantLocation(location){
+    pushRestaurantLog({ type:"user", text: location });
+    state.restaurant.location = location;
+    saveState();
+    proceedToRestaurantBudgetStep();
+  }
+
+  // カテゴリ／ランチ・ディナーに応じたデフォルト予算（🔧 差し替えポイント：相場が変わったら調整）
+  function defaultRestaurantBudgetLabel(){
+    var r = state.restaurant;
+    if(r.category === "restaurant" && r.mealtime === "dinner") return "5,000円/人（お飲み物込み）";
+    return "2,000円くらい";
+  }
+
+  function proceedToRestaurantBudgetStep(){
+    var label = defaultRestaurantBudgetLabel();
+    pushRestaurantLog({ type:"ai", text:"予算の目安はこちらでいかがでしょう？具体的なご希望があれば入力欄から教えてください。" });
+    pushRestaurantLog({ type:"restaurant-budget-prompt", defaultLabel: label });
+    state.restaurant.step = "budget";
+    saveState();
+    render();
+  }
+
+  function onAcceptDefaultBudget(label){
+    pushRestaurantLog({ type:"user", text:"この予算でOK（"+label+"）" });
+    state.restaurant.budgetLabel = label;
+    state.restaurant.budgetNote = null;
+    runRestaurantSearch();
+  }
+
+  // 自由入力から予算の意図を軽く読み取る簡易パーサー（🔧 実運用では自然言語理解をAPI側に任せる想定）
+  function parseRestaurantBudgetIntent(text){
+    var numMatch = text.match(/([0-9０-９,，]{3,6})\s*円/);
+    if(numMatch){
+      var normalized = numMatch[1]
+        .replace(/[０-９]/g, function(d){ return String.fromCharCode(d.charCodeAt(0)-0xFEE0); })
+        .replace(/[,，]/g,"");
+      return { label: Number(normalized).toLocaleString() + "円くらい", note:null };
+    }
+    if(/高め|高く|贅沢|奮発/.test(text)) return { label:null, note:"予算はもっと高めが希望" };
+    if(/安め|安く|リーズナブル|抑えめ/.test(text)) return { label:null, note:"予算はもっと控えめが希望" };
+    return null;
+  }
+
+  function submitRestaurantFreeText(text){
+    pushRestaurantLog({ type:"user", text: text });
+    var step = state.restaurant.step;
+    if(step === "location"){
+      state.restaurant.location = text;
+      saveState();
+      proceedToRestaurantBudgetStep();
+      return;
+    }
+    if(step === "budget"){
+      var parsed = parseRestaurantBudgetIntent(text);
+      if(parsed){
+        state.restaurant.budgetLabel = parsed.label || defaultRestaurantBudgetLabel();
+        state.restaurant.budgetNote = parsed.note;
+      }else{
+        state.restaurant.budgetLabel = defaultRestaurantBudgetLabel();
+        state.restaurant.budgetNote = text;
+      }
+      saveState();
+      runRestaurantSearch();
+      return;
+    }
+    // 結果表示後の追加相談（雰囲気の希望など）は、条件に追記して再検索する
+    state.restaurant.extraNote = text;
+    saveState();
+    runRestaurantSearch();
+  }
+
+  // 通信エラー・APIキー未設定時のフォールバック用モックデータ
+  var MOCK_RESTAURANT_SPOTS = [
+    { name:"個室イタリアン Luce",   area:"表参道", desc:"落ち着いた半個室でゆっくり会話できるイタリアン。", dateTips:["半個室あり。予約時に指定するのがおすすめ"], unverified:true },
+    { name:"カウンター割烹 結",     area:"銀座",   desc:"隣り合って座れる和食カウンター。初対面の緊張がほぐれやすい。", dateTips:["横並びのカウンター席で初デート向き"], unverified:true },
+    { name:"ワインバー Nocturne",   area:"広尾",   desc:"照明を落とした落ち着いた空間で会話に集中できる。", dateTips:["ワインの種類が豊富。お酒好きな相手におすすめ"], unverified:true }
+  ];
+
+  // /api/restaurant-recommend（Gemini API + Google検索連携=grounding優先）に問い合わせる。
+  // APIキー未設定・通信エラー時は、従来のモックにフォールバックする。
+  async function fetchRestaurantRecommendation(params){
+    try{
+      var res = await fetch("/api/restaurant-recommend", {
+        method:"POST",
+        headers:{ "Content-Type":"application/json" },
+        body: JSON.stringify(params)
+      });
+      if(res.ok){
+        var data = await res.json();
+        if(data && Array.isArray(data.spots)){
+          return { spots:data.spots, grounded: !!data.grounded, mock:false };
+        }
+      }
+    }catch(e){ /* 通信エラー時は下のモックにフォールバック */ }
+    await sleep(900);
+    return { spots: MOCK_RESTAURANT_SPOTS, grounded:false, mock:true };
+  }
+
+  async function runRestaurantSearch(){
+    pushRestaurantLog({ type:"typing" });
+    render();
+    var r = state.restaurant;
+    var result = await fetchRestaurantRecommendation({
+      gender: state.gender,
+      category: r.category,
+      mealtime: r.mealtime,
+      location: r.location,
+      budgetLabel: r.budgetLabel,
+      budgetNote: r.budgetNote,
+      extraNote: r.extraNote
+    });
+    state.restaurantChat.log = state.restaurantChat.log.filter(function(x){ return x.type!=="typing"; });
+    pushRestaurantLog({ type:"ai", text:"こちらのお店はいかがでしょう？デート視点のポイントも添えています。" });
+    pushRestaurantLog({ type:"restaurant-result", spots:result.spots, grounded:result.grounded });
+    state.restaurant.step = "done";
+    bellHasNote = true;
+    saveState();
+    render();
   }
 
   /* =========================================================
@@ -1633,10 +2535,30 @@
     screen.appendChild(mainCard);
 
     var diagGrid = el("div","diag-grid");
-    diagGrid.innerHTML =
-      '<div class="diag-item"><div class="k">髪質</div><div class="v">'+state.diagnosis.texture+'</div></div>'+
-      '<div class="diag-item"><div class="k">つむじ</div><div class="v">'+state.diagnosis.crown+'</div></div>'+
-      '<div class="diag-item"><div class="k">癖毛</div><div class="v">'+state.diagnosis.curl+'</div></div>';
+    var diagFields = [
+      { key:"texture", label:"髪質",   opts:TEXTURE_OPTS },
+      { key:"crown",   label:"つむじ", opts:CROWN_OPTS },
+      { key:"curl",    label:"癖毛",   opts:CURL_OPTS }
+    ];
+    diagFields.forEach(function(field){
+      var item = el("div","diag-item");
+      item.appendChild(el("div","k",field.label));
+      var select = document.createElement("select");
+      select.className = "v-select";
+      field.opts.forEach(function(opt){
+        var o = document.createElement("option");
+        o.value = opt; o.textContent = opt;
+        if(state.diagnosis[field.key] === opt) o.selected = true;
+        select.appendChild(o);
+      });
+      select.addEventListener("change", function(){
+        state.diagnosis[field.key] = select.value;
+        saveState();
+        render();
+      });
+      item.appendChild(select);
+      diagGrid.appendChild(item);
+    });
     screen.appendChild(diagGrid);
 
     screen.appendChild(el("div","section-label","美容師向けオーダー文言"));
@@ -1647,51 +2569,31 @@
     // 自社で画像生成APIは呼ばず、外部の生成AIツールにそのまま貼り付けられる
     // プロンプトを用意することで、コスト・品質リスク・顔写真の取り扱いリスクを避けつつ
     // 「もっと見たい」ユーザーの導線を用意する。
-    screen.appendChild(el("div","section-label","もっとリアルに試したい方へ"));
-    screen.appendChild(el("div","advice-box","ご自身の写真でこの髪型を試したい場合は、下のプロンプトをコピーして、Gemini（nanobanana）やChatGPTなどの画像生成機能にご自身の写真と一緒に貼り付けてください。"));
+    screen.appendChild(el("div","section-label-highlight","AIヘアカット（おすすめ！）"));
+    screen.appendChild(el("div","advice-box","ご自身の写真でこの髪型を試せます。下のプロンプトをコピーして、GeminiやChatGPTで試して生成できます。"));
+    var promptLabel = el("div","","プロンプト：①コピー→②ChatGPT/Geminiで試す→③画像作成");
+    promptLabel.style.cssText = "font-size:11.5px;font-weight:700;color:var(--tab-accent);margin-top:10px;margin-bottom:4px;";
+    screen.appendChild(promptLabel);
     var promptBox = el("textarea","memo");
     promptBox.readOnly = true;
     promptBox.value = buildExternalPrompt(style);
     promptBox.style.minHeight = "76px";
     screen.appendChild(promptBox);
-    var copyBtn = el("button","mini-btn","プロンプトをコピーする");
-    copyBtn.style.marginTop = "8px";
+
+    var btnRow = el("div","btn-row");
+    var copyBtn = el("button","mini-btn","📋 コピー");
     copyBtn.addEventListener("click", function(){ copyText(promptBox.value); });
-    screen.appendChild(copyBtn);
+    var chatgptBtn = el("button","mini-btn btn-chatgpt","ChatGPTで試す");
+    chatgptBtn.addEventListener("click", function(){ copyAndOpen(promptBox.value, "https://chatgpt.com/", "ChatGPT"); });
+    var geminiBtn = el("button","mini-btn btn-gemini","Geminiで試す");
+    geminiBtn.addEventListener("click", function(){ copyAndOpen(promptBox.value, "https://gemini.google.com/app", "Gemini"); });
+    btnRow.appendChild(copyBtn); btnRow.appendChild(chatgptBtn); btnRow.appendChild(geminiBtn);
+    screen.appendChild(btnRow);
+
     var promptNote = el("div","");
     promptNote.style.cssText = "font-size:11px;color:var(--ink-faint);margin-top:8px;line-height:1.6;";
-    promptNote.textContent = "※生成AIツールへの写真アップロードは、各サービスの利用規約に従ってください。生成結果の品質は保証されません。";
+    promptNote.textContent = "※生成結果の品質は保証されません。生成AIサービスの利用規約に従ってご利用ください。";
     screen.appendChild(promptNote);
-
-    // ---- サブエリア：コーデ ----
-    screen.appendChild(el("div","section-label","おすすめコーデ例"));
-    if(state.outfit){
-      screen.appendChild(el("div","advice-box", "「"+state.outfit+"」を選択中です。"));
-    }else{
-      var goFashion = el("button","mini-btn","ファッション相談へ");
-      goFashion.addEventListener("click", function(){ state.tab="fashion"; render(); });
-      var noOutfit = el("div","empty-state");
-      noOutfit.style.padding = "10px 4px";
-      noOutfit.innerHTML = '<p style="margin:0 0 8px;">まだコーデが選択されていません。</p>';
-      noOutfit.appendChild(goFashion);
-      screen.appendChild(noOutfit);
-    }
-
-    // ---- サブエリア：デートスポットメモ ----
-    screen.appendChild(el("div","section-label","予約・検討中のデートスポットメモ"));
-    if(state.dateCandidates.length){
-      var candWrap = el("div","tags");
-      candWrap.style.display="flex"; candWrap.style.flexWrap="wrap"; candWrap.style.gap="5px"; candWrap.style.marginBottom="6px";
-      state.dateCandidates.forEach(function(name){
-        candWrap.appendChild(el("span","tag",name));
-      });
-      screen.appendChild(candWrap);
-    }
-    var memo = el("textarea","memo");
-    memo.placeholder = "候補の店名・予約日時・メモなどを自由に記入できます";
-    memo.value = state.dateMemo || "";
-    memo.addEventListener("input", function(){ state.dateMemo = memo.value; saveState(); });
-    screen.appendChild(memo);
 
     var saveBtn = el("button","btn","カルテを保存する");
     saveBtn.style.marginTop = "6px";
@@ -1743,26 +2645,28 @@
   ========================================================= */
   var APP_ABOUT = {
     avatarInitial: "J",
+    avatarImage: "profile-avatar.jpg", // 🔧 差し替えポイント: public/直下の画像ファイル名。無ければavatarInitialを表示
     name: "ジェイク（個人開発）",
     // 🔧 差し替えポイント: 実際のお名前・写真に置き換えてください
-    tagline: "婚活中の一人でも多くの方の「似合う」を後押ししたくて作りました。",
-    story: "婚活の現場を見てきた中で、中身は素敵なのに髪型で第一印象を損している方を何人も見てきました。美容師さんに相談する前の「予習」として、気軽に使ってもらえたらと思い、個人でこのアプリを開発しています。",
-    dataNote: "アップロードされた写真は解析のために外部のAIサービスへ一時的に送信され、当方のサーバーには保存されません。",
+    tagline: "恋活・婚活中のあなたの「似合う」を、後押しします。",
+    story: "恋活・婚活の現場を見てきた中で、中身は素敵なのに、髪型やコーディネートで第一印象を損してしまっている方を何人も見てきました。美容師さんやスタイリストに相談する前の「予習」として、気軽に使ってもらえたらと思い、個人でこのアプリを開発しています。",
+    appIntro: "スクアドは、スクリーンショットや写真をアップロードするだけでAIがアドバイスをくれる、恋活・婚活世代のためのビューティー・ライフスタイルアシスタントです。",
+    appFeatures: [
+      { icon:"hair",       label:"ヘア",       desc:"顔型に似合う髪型をAIが診断" },
+      { icon:"fashion",    label:"ファッション", desc:"今日のコーデを色・靴までまるごとチェック" },
+      { icon:"restaurant", label:"レストラン",  desc:"初デートにぴったりのお店をAIが提案" }
+    ],
+    dataNote: "アップロードした写真は、診断のために外部のAIサービスへ一時的に送信されるのみで、当方のサーバーに保存されることはありません。診断結果やメモなどのデータも、すべてこの端末（ブラウザ）内にのみ保存され、外部に共有されることはありません。",
+    seriesApps: [
+      { emoji:"💬", label:"恋活・婚活コミュニケーション", sub:"SCAD CHAT", kind:"external", url:"https://scad-chat.vercel.app/" },
+      { icon:"hair", label:"ヘアスタイル", sub:"SCAD BEAUTY（このアプリ）", kind:"tab", tab:"hair" },
+      { icon:"fashion", label:"ファッション", sub:"SCAD BEAUTY（このアプリ）", kind:"tab", tab:"fashion" },
+      { emoji:"🔜", label:"その他", sub:"現在開発中", kind:"soon" }
+    ],
     sns: [
       // 🔧 差し替えポイント: 実際のSNSリンクに置き換えてください
       { label:"Instagram", icon:"instagram", url:"https://instagram.com/" },
       { label:"X",         icon:"x",         url:"https://x.com/" }
-    ],
-    // 🔧 差し替えポイント: 開発中・リリース済みアプリが増えたらここに追加してください
-    apps: [
-      { name:"恋活・婚活アドバイザー", desc:"スクショで恋愛・婚活アドバイス", url:"https://scad-chat.vercel.app/" },
-      { name:"ビューティーコーデアドバイザー", desc:"現在ご利用中のアプリです", current:true }
-    ],
-    // 🔧 差し替えポイント: 3タブの紹介文。文言変更時はここだけ直せばOK
-    features: [
-      { tab:"hair", name:"ヘアアドバイザー", desc:"ヘアカット・アレンジの相談とオーダーシート作成。自分の顔写真でヘアスタイルを試せるアドバイスもあります。" },
-      { tab:"fashion", name:"ファッションアドバイザー", desc:"今日のコーディネート・カラーコーデのヒントをご提案します。" },
-      { tab:"restaurant", name:"レストランアドバイザー", desc:"デート向けの飲食店探しをサポートします。" }
     ]
   };
 
@@ -1772,50 +2676,75 @@
     screen.appendChild(closeBtn);
 
     var head = el("div","about-header");
+    var avatarHtml = APP_ABOUT.avatarImage
+      ? '<img src="'+APP_ABOUT.avatarImage+'" alt="'+APP_ABOUT.name+'">'
+      : APP_ABOUT.avatarInitial;
     head.innerHTML =
-      '<div class="about-avatar">'+APP_ABOUT.avatarInitial+'</div>'+
+      '<div class="about-avatar">'+avatarHtml+'</div>'+
       '<div><div class="about-name">'+APP_ABOUT.name+'</div><div class="about-tagline">'+APP_ABOUT.tagline+'</div></div>';
     screen.appendChild(head);
 
-    screen.appendChild(el("div","section-label","このアプリでできること"));
-    APP_ABOUT.features.forEach(function(f){
+    // ---- ①開発者について ----
+    screen.appendChild(el("div","section-label","私について"));
+    screen.appendChild(el("div","advice-box", APP_ABOUT.story));
+
+    // ---- ②このアプリについて ----
+    screen.appendChild(el("div","section-label","このアプリについて"));
+    screen.appendChild(el("div","advice-box", APP_ABOUT.appIntro));
+    var featureList = el("div","");
+    featureList.style.cssText = "display:flex;flex-direction:column;gap:8px;margin-top:8px;";
+    APP_ABOUT.appFeatures.forEach(function(f){
+      var row = el("div","");
+      row.style.cssText = "display:flex;align-items:flex-start;gap:9px;";
+      var iconWrap = el("div","");
+      iconWrap.style.cssText = "width:26px;height:26px;border-radius:50%;background:var(--tab-accent-soft);color:var(--tab-accent);display:flex;align-items:center;justify-content:center;flex:0 0 auto;";
+      iconWrap.innerHTML = '<span style="width:14px;height:14px;display:flex;">'+ICONS[f.icon]+'</span>';
+      row.appendChild(iconWrap);
+      var textWrap = el("div","");
+      textWrap.innerHTML = '<div style="font-size:12.5px;font-weight:700;">'+f.label+'</div><div style="font-size:11.5px;color:var(--ink-soft);margin-top:1px;">'+f.desc+'</div>';
+      row.appendChild(textWrap);
+      featureList.appendChild(row);
+    });
+    screen.appendChild(featureList);
+
+    // ---- ③個人情報保護 ----
+    screen.appendChild(el("div","section-label","個人情報の取り扱いについて"));
+    screen.appendChild(el("div","advice-box", APP_ABOUT.dataNote));
+
+    // ---- ④SCADシリーズ（関連アプリ）----
+    screen.appendChild(el("div","section-label","SCADシリーズ"));
+    APP_ABOUT.seriesApps.forEach(function(app){
       var card = el("div","info-card");
       var swatch = el("div","swatch");
-      swatch.style.background = "var(--accent-"+f.tab+")";
-      swatch.innerHTML = ICONS[f.tab];
+      swatch.innerHTML = app.icon ? ICONS[app.icon] : app.emoji;
       card.appendChild(swatch);
       var body = el("div","body");
       body.innerHTML =
-        '<div class="title-row"><span class="title">'+f.name+'</span></div>'+
-        '<div class="desc">'+f.desc+'</div>';
+        '<div class="title-row"><span class="title">'+app.label+'</span></div>'+
+        '<div class="desc">'+app.sub+'</div>';
+      if(app.kind === "external"){
+        var linkBtn = el("a","mini-btn","開く");
+        linkBtn.href = app.url;
+        linkBtn.target = "_blank";
+        linkBtn.rel = "noopener noreferrer";
+        linkBtn.style.cssText = "margin-top:9px;display:inline-block;text-decoration:none;";
+        body.appendChild(linkBtn);
+      }else if(app.kind === "tab"){
+        var tabBtn = el("button","mini-btn","開く");
+        tabBtn.style.marginTop = "9px";
+        tabBtn.addEventListener("click", function(){ state.tab = app.tab; render(); });
+        body.appendChild(tabBtn);
+      }else{
+        var soonBtn = el("span","tag","近日公開");
+        soonBtn.style.marginTop = "9px";
+        soonBtn.style.display = "inline-block";
+        body.appendChild(soonBtn);
+      }
       card.appendChild(body);
       screen.appendChild(card);
     });
 
-    screen.appendChild(el("div","section-label","このアプリについて"));
-    var storyBox = el("div","advice-box", APP_ABOUT.story);
-    screen.appendChild(storyBox);
-
-    screen.appendChild(el("div","section-label","写真の取り扱いについて"));
-    screen.appendChild(el("div","advice-box", APP_ABOUT.dataNote));
-
-    screen.appendChild(el("div","section-label","開発アプリ一覧"));
-    var appsList = el("div","app-ref-list");
-    APP_ABOUT.apps.forEach(function(a){
-      var item = document.createElement(a.url ? "a" : "div");
-      item.className = "app-ref-item" + (a.current ? " current" : "");
-      if(a.url){
-        item.href = a.url;
-        item.target = "_blank";
-        item.rel = "noopener noreferrer";
-      }
-      var nameLine = el("div","app-ref-name", a.name + (a.current ? '<span class="app-ref-current-tag">現在利用中</span>' : ""));
-      item.appendChild(nameLine);
-      if(a.desc) item.appendChild(el("div","app-ref-desc", a.desc));
-      appsList.appendChild(item);
-    });
-    screen.appendChild(appsList);
-
+    // ---- お問い合わせ・SNS ----
     screen.appendChild(el("div","section-label","お問い合わせ・SNS"));
     var snsRow = el("div","sns-row");
     APP_ABOUT.sns.forEach(function(s){
