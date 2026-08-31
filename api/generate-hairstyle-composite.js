@@ -80,7 +80,7 @@ export default async function handler(req, res) {
     if (!response.ok) {
       const errText = await response.text().catch(() => "");
       console.error("Gemini API error:", response.status, errText);
-      res.status(502).json({ error: "画像生成APIの呼び出しに失敗しました" });
+      res.status(502).json({ error: `画像生成APIエラー(${response.status}): ${errText.slice(0, 300)}` });
       return;
     }
 
@@ -89,8 +89,9 @@ export default async function handler(req, res) {
     const imagePart = parts.find((p) => p.inlineData);
 
     if (!imagePart) {
-      console.error("No image returned from Gemini:", JSON.stringify(data).slice(0, 500));
-      res.status(502).json({ error: "画像が生成されませんでした" });
+      const snippet = JSON.stringify(data).slice(0, 300);
+      console.error("No image returned from Gemini:", snippet);
+      res.status(502).json({ error: `画像が生成されませんでした: ${snippet}` });
       return;
     }
 
@@ -100,6 +101,6 @@ export default async function handler(req, res) {
     res.status(200).json({ image: `data:${mimeType};base64,${base64}` });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error: "サーバーエラーが発生しました" });
+    res.status(500).json({ error: `サーバーエラー: ${err && err.message ? err.message : String(err)}` });
   }
 }
