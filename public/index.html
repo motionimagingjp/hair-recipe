@@ -898,6 +898,7 @@
       fashionLastAdviceType:null,  // 'today' | 'reference' | 'coordinate'
       fashionLastAdvice:null,      // { rawText, combo } コピー・詳細アドバイスで使用
       fashionLastDetailText:null,
+      fashionAIAdvice:null,
       // ---- レストランアドバイザー用（チャット形式のヒアリング条件） ----
       restaurantChat:{ started:false, log:[] },
       restaurant:{
@@ -2094,6 +2095,7 @@
     state.fashionLastAdviceType = null;
     state.fashionLastAdvice = null;
     state.fashionLastDetailText = null;
+    state.fashionAIAdvice = null;
     saveState();
   }
 
@@ -2223,19 +2225,6 @@
     return html;
   }
 
-  // 今日のコーデ診断データを生成する（表示用の短いメッセージは作らず、そのまま詳細アドバイスに使う）
-  function generateFashionCheckDiagnosis(){
-    var top = fashionPick(state.gender === "men" ? FASHION_MENS_TOPS : FASHION_LADIES_TOPS);
-    var bottom = fashionPick(state.gender === "men" ? FASHION_MENS_BOTTOMS : FASHION_LADIES_BOTTOMS);
-    var jewelry = fashionPick(state.gender === "men" ? FASHION_MENS_JEWELRY : FASHION_LADIES_JEWELRY);
-    var c = fashionPick(FASHION_COMBOS);
-    var parts = c.combo.split('×');
-    state.fashionDiagnosis = { top:top, bottom:bottom, topColor:parts[0], bottomColor:parts[1], jewelry:jewelry };
-    state.fashionLastAdviceType = "today";
-    state.outfit = top+"×"+bottom;
-    saveState();
-  }
-
   function buildFashionReferenceAdviceHtml(){
     var base = fashionPick(state.gender === "men" ? FASHION_MENS_BASE : FASHION_LADIES_BASE);
     var acc  = fashionPick(state.gender === "men" ? FASHION_MENS_ACC : FASHION_LADIES_ACC);
@@ -2270,6 +2259,23 @@
 
   function buildFashionDetailAdviceHtml(){
     var d = state.fashionDiagnosis || { top:"トップス", bottom:"ボトムス", topColor:"ネイビー", bottomColor:"グレー" };
+
+    // 実際にGemini Visionで解析済みの場合は、その結果をそのまま使う
+    if(state.fashionAIAdvice){
+      var a = state.fashionAIAdvice;
+      var aiHtml =
+        "写真を拝見しました！<br>"+
+        "👕 トップス：<b>"+d.top+"</b>／👖 ボトムス：<b>"+d.bottom+"</b>（<b>"+d.topColor+"×"+d.bottomColor+"</b>）<br><br>"+
+        "🎨 <b>色</b>："+fashionColorNote()+a.colorComment+"<br><br>"+
+        "👟 <b>靴</b>："+a.shoeAdvice+"<br><br>"+
+        "💍 <b>ワンポイント</b>："+a.accessoryAdvice+"<br><br>"+
+        (a.silhouetteTip || fashionFinishTip());
+      state.fashionLastDetailText = fashionPlainText(aiHtml);
+      saveState();
+      return aiHtml;
+    }
+
+    // ---- ここから下はモック（AI解析が使えない場合のフォールバック：色コーデ経由など） ----
     var c = findFashionCombo(d.topColor, d.bottomColor) || genericFashionCombo(d.topColor, d.bottomColor);
     var accList = state.gender === "men" ? FASHION_MENS_ACC : FASHION_LADIES_ACC;
     var baseList = state.gender === "men" ? FASHION_MENS_BASE : FASHION_LADIES_BASE;
@@ -2323,6 +2329,8 @@
       else if(corr.bottom) d.bottomColor = corr.color;
       else d.topColor = corr.color;
     }
+    // 訂正内容とAI解析結果の文言がズレないよう、訂正後はモックでの再生成に切り替える
+    state.fashionAIAdvice = null;
     saveState();
   }
 
@@ -2395,21 +2403,52 @@
     render();
   }
 
-  // 今日のコーデ（ファッションチェック）画像アップロード
+  // 今日のコーデ（ファッションチェック）画像アップロード → Gemini Visionで実解析
+  async function analyzeFashionCheck(imageDataUrl){
+    try{
+      var res = await fetch("/api/analyze-fashion-check", {
+        method:"POST",
+        headers:{ "Content-Type":"application/json" },
+        body: JSON.stringify({
+          image: imageDataUrl,
+          gender: state.gender,
+          personalColor: state.fashionPersonalColor
+        })
+      });
+      var data = await res.json().catch(function(){ return {}; });
+      state.fashionChat.log = state.fashionChat.log.filter(function(x){ return x.type!=="typing"; });
+      if(res.ok && data.top){
+        state.fashionDiagnosis = { top:data.top, bottom:data.bottom, topColor:data.topColor, bottomColor:data.bottomColor };
+        state.fashionAIAdvice = {
+          colorComment: data.colorComment, shoeAdvice: data.shoeAdvice,
+          accessoryAdvice: data.accessoryAdvice, silhouetteTip: data.silhouetteTip
+        };
+        state.fashionLastAdviceType = "today";
+        state.outfit = data.top + "×" + data.bottom;
+        saveState();
+        var html = buildFashionDetailAdviceHtml();
+        pushFashion({ type:"fashion-detail", html:html, rawText: state.fashionLastDetailText });
+      }else{
+        console.error("fashion analysis failed:", res.status, data.error);
+        pushFashion({ type:"ai", text:"写真の分析に失敗しました。\n\n【エラー詳細（デバッグ用）】\n"+(data.error || ("status: "+res.status)) });
+      }
+    }catch(e){
+      state.fashionChat.log = state.fashionChat.log.filter(function(x){ return x.type!=="typing"; });
+      pushFashion({ type:"ai", text:"通信エラーが発生しました。時間をおいて再度お試しください。" });
+    }
+    render();
+  }
+
   byId("fileFashionToday").addEventListener("change", function(e){
     var file = e.target.files && e.target.files[0];
     if(!file) return;
     fileToDataUrl(file).then(function(dataUrl){
-      pushFashion({ type:"user", text:"", thumb:dataUrl });
+      return resizeImageDataUrl(dataUrl, 1280);
+    }).then(function(resized){
+      pushFashion({ type:"user", text:"", thumb:resized });
       pushFashion({ type:"typing" });
       render();
-      setTimeout(function(){
-        state.fashionChat.log = state.fashionChat.log.filter(function(x){ return x.type!=="typing"; });
-        generateFashionCheckDiagnosis();
-        var html = buildFashionDetailAdviceHtml();
-        pushFashion({ type:"fashion-detail", html:html, rawText: state.fashionLastDetailText });
-        render();
-      }, 1000);
+      return analyzeFashionCheck(resized);
     });
     e.target.value = "";
   });
