@@ -1535,12 +1535,9 @@
       var b1 = el("button","chip primary","これでオーダーシートを作る");
       b1.addEventListener("click", function(){ goToOrder(style); });
       actions.appendChild(b1);
-      var refImage = getStyleReferenceImage(style);
-      if(refImage){
-        var b2 = el("button","chip primary","自分に似合うか試す（ヘアマッチング）");
-        b2.addEventListener("click", function(){ onTryHairComposite(style); });
-        actions.appendChild(b2);
-      }
+      var b2 = el("button","chip primary","自分に似合うか試す（ヘアマッチング）");
+      b2.addEventListener("click", function(){ onTryHairComposite(style); });
+      actions.appendChild(b2);
       confirmWrap.appendChild(actions);
       return confirmWrap;
     }
@@ -1885,16 +1882,9 @@
   function goToOrder(style){ state.tab="order"; state.seenOrderBadge = true; saveState(); render(); }
 
   /* =========================================================
-     AIで「自分に似合うか試す」（顔写真×髪型写真の2面図合成）
+     AIで「自分に似合うか試す」（自撮り写真1枚＋テキストでの髪型指定で2面図を生成）
      /api/generate-hairstyle-composite（Gemini画像生成）を呼び出す。
   ========================================================= */
-  // スタイルの実写真（Image B用）を取得。実写真が無いスタイル（イラストのみ）ではボタン自体を出さない
-  function getStyleReferenceImage(style){
-    if(style.refPhoto) return style.refPhoto;
-    if(style.img && IMAGES[style.img]) return IMAGES[style.img];
-    return null;
-  }
-
   function onTryHairComposite(style){
     pushLog({ type:"user", text:"自分に似合うか試す（ヘアマッチング）" });
     state.pendingCompositeStyle = style;
@@ -1928,16 +1918,14 @@
     pushLog({ type:"typing" });
     render();
 
-    var refImageRaw = getStyleReferenceImage(style);
-    var refImage = await resizeImageDataUrl(refImageRaw, 1280);
     try{
       var res = await fetch("/api/generate-hairstyle-composite", {
         method:"POST",
         headers:{ "Content-Type":"application/json" },
         body: JSON.stringify({
           userFaceImage: selfieDataUrl,
-          targetHairstyleImage: refImage,
-          note: "対象：" + genderLabel(style.gender) + "／髪型：" + style.name
+          styleName: style.name,
+          styleSub: style.sub
         })
       });
       var data = await res.json().catch(function(){ return {}; });
