@@ -50,7 +50,7 @@ export default async function handler(req, res) {
     const conditionLines = [
       "・カテゴリ: " + categoryLabel + (mealtimeLabel ? "（" + mealtimeLabel + "）" : ""),
       "・エリア: " + (location || "指定なし"),
-      "・予算目安: " + (budgetLabel || "指定なし") + (budgetNote ? "（補足: " + budgetNote + "）" : ""),
+      "・予算目安（お一人あたり）: " + (budgetLabel || "指定なし") + (budgetNote ? "（補足: " + budgetNote + "）" : ""),
       "・相談者: " + genderLabel,
       extraNote ? "・追加の希望: " + extraNote : null
     ].filter(Boolean).join("\n");
