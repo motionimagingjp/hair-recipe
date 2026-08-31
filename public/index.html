@@ -529,6 +529,25 @@
   .about-avatar img{width:100%;height:100%;object-fit:cover;display:block;}
   .about-name{font-weight:700; font-size:14.5px;}
   .about-tagline{font-size:12px; color:var(--ink-soft); margin-top:3px; line-height:1.6;}
+  .series-list{ display:flex; flex-direction:column; }
+  .series-row{
+    display:flex; align-items:center; gap:10px;
+    padding:11px 2px; text-decoration:none; color:var(--ink);
+    background:none; border:none; border-bottom:1px solid var(--line);
+    font-family:var(--font-body); cursor:pointer; width:100%; text-align:left;
+  }
+  .series-row:last-child{ border-bottom:none; }
+  .series-row.soon{ cursor:default; }
+  .series-icon{
+    width:28px;height:28px;border-radius:50%; flex:0 0 auto;
+    background:var(--tab-accent-soft); color:var(--tab-accent);
+    display:flex;align-items:center;justify-content:center;font-size:14px;
+  }
+  .series-icon svg{width:14px;height:14px;}
+  .series-text{ flex:1; min-width:0; display:flex; align-items:baseline; gap:7px; flex-wrap:wrap; }
+  .series-label{ font-size:13px; font-weight:700; }
+  .series-sub{ font-size:11px; color:var(--ink-faint); }
+  .series-arrow{ font-size:17px; color:var(--ink-faint); flex:0 0 auto; }
   .sns-row{display:flex; gap:10px; margin-top:2px;}
   .sns-btn{
     width:38px;height:38px;border-radius:50%;
@@ -2646,7 +2665,7 @@
   var APP_ABOUT = {
     avatarInitial: "J",
     avatarImage: "profile-avatar.jpg", // 🔧 差し替えポイント: public/直下の画像ファイル名。無ければavatarInitialを表示
-    name: "ジェイク（個人開発）",
+    name: "はじめまして",
     // 🔧 差し替えポイント: 実際のお名前・写真に置き換えてください
     tagline: "恋活・婚活中のあなたの「似合う」を、後押しします。",
     story: "恋活・婚活の現場を見てきた中で、中身は素敵なのに、髪型やコーディネートで第一印象を損してしまっている方を何人も見てきました。美容師さんやスタイリストに相談する前の「予習」として、気軽に使ってもらえたらと思い、個人でこのアプリを開発しています。",
@@ -2669,6 +2688,11 @@
       { label:"X",         icon:"x",         url:"https://x.com/" }
     ]
   };
+
+  // ヘッダーの「このアプリについて」アイコンを、汎用のiマークから開発者アバターに差し替える
+  if(APP_ABOUT.avatarImage){
+    byId("infoBtn").innerHTML = '<img src="'+APP_ABOUT.avatarImage+'" alt="このアプリについて" style="width:22px;height:22px;border-radius:50%;object-fit:cover;display:block;">';
+  }
 
   function renderAboutScreen(screen){
     var closeBtn = el("button","close-link","← 閉じる");
@@ -2713,36 +2737,31 @@
 
     // ---- ④SCADシリーズ（関連アプリ）----
     screen.appendChild(el("div","section-label","SCADシリーズ"));
+    var seriesList = el("div","series-list");
     APP_ABOUT.seriesApps.forEach(function(app){
-      var card = el("div","info-card");
-      var swatch = el("div","swatch");
-      swatch.innerHTML = app.icon ? ICONS[app.icon] : app.emoji;
-      card.appendChild(swatch);
-      var body = el("div","body");
-      body.innerHTML =
-        '<div class="title-row"><span class="title">'+app.label+'</span></div>'+
-        '<div class="desc">'+app.sub+'</div>';
+      var isSoon = app.kind === "soon";
+      var row;
       if(app.kind === "external"){
-        var linkBtn = el("a","mini-btn","開く");
-        linkBtn.href = app.url;
-        linkBtn.target = "_blank";
-        linkBtn.rel = "noopener noreferrer";
-        linkBtn.style.cssText = "margin-top:9px;display:inline-block;text-decoration:none;";
-        body.appendChild(linkBtn);
+        row = document.createElement("a");
+        row.href = app.url;
+        row.target = "_blank";
+        row.rel = "noopener noreferrer";
       }else if(app.kind === "tab"){
-        var tabBtn = el("button","mini-btn","開く");
-        tabBtn.style.marginTop = "9px";
-        tabBtn.addEventListener("click", function(){ state.tab = app.tab; render(); });
-        body.appendChild(tabBtn);
+        row = document.createElement("button");
+        row.type = "button";
+        row.addEventListener("click", function(){ state.tab = app.tab; render(); });
       }else{
-        var soonBtn = el("span","tag","近日公開");
-        soonBtn.style.marginTop = "9px";
-        soonBtn.style.display = "inline-block";
-        body.appendChild(soonBtn);
+        row = document.createElement("div");
       }
-      card.appendChild(body);
-      screen.appendChild(card);
+      row.className = "series-row" + (isSoon ? " soon" : "");
+      var iconHtml = app.icon ? ICONS[app.icon] : app.emoji;
+      row.innerHTML =
+        '<span class="series-icon">'+iconHtml+'</span>'+
+        '<span class="series-text"><span class="series-label">'+app.label+'</span><span class="series-sub">'+app.sub+'</span></span>'+
+        (isSoon ? '<span class="tag">近日公開</span>' : '<span class="series-arrow">›</span>');
+      seriesList.appendChild(row);
     });
+    screen.appendChild(seriesList);
 
     // ---- お問い合わせ・SNS ----
     screen.appendChild(el("div","section-label","お問い合わせ・SNS"));
