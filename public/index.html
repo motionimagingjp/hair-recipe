@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>スクアド</title>
+<title>HAIR Recipe</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@500;700&family=Zen+Kaku+Gothic+New:wght@400;500;700;900&display=swap" rel="stylesheet">
@@ -687,7 +687,7 @@
       <header class="app-header" id="appHeader">
         <div class="brand-mark" id="brandMark">髪</div>
         <div class="header-text">
-          <div class="header-mode" id="headerMode">スクアド ヘアスタイル</div>
+          <div class="header-mode" id="headerMode">スクアド HAIR ADVISOR</div>
           <div class="header-app" id="headerApp">ヘアアドバイザー</div>
         </div>
         <div class="header-icons">
@@ -743,9 +743,9 @@
      0. データ定義
   ========================================================= */
   var TABS = [
-    { id:"hair",       label:"ヘア",         accent:"--accent-hair",       accentSoft:"--accent-hair-soft",       app:"ヘアアドバイザー", mode:"スクアド ヘアスタイル", mark:"髪" },
-    { id:"fashion",    label:"ファッション", accent:"--accent-fashion",    accentSoft:"--accent-fashion-soft",    app:"ファッションアドバイザー", mode:"スクアド ファッション",      mark:"服" },
-    { id:"restaurant", label:"レストラン",   accent:"--accent-restaurant", accentSoft:"--accent-restaurant-soft", app:"メンズ向けデート店アドバイザー",     mode:"スクアド レストラン",   mark:"店" },
+    { id:"hair",       label:"ヘア",         accent:"--accent-hair",       accentSoft:"--accent-hair-soft",       app:"ヘアアドバイザー", mode:"スクアド HAIR ADVISOR", mark:"髪" },
+    { id:"fashion",    label:"ファッション", accent:"--accent-fashion",    accentSoft:"--accent-fashion-soft",    app:"ファッション相談", mode:"FASHION",      mark:"服" },
+    { id:"restaurant", label:"レストラン",   accent:"--accent-restaurant", accentSoft:"--accent-restaurant-soft", app:"デート店検索",     mode:"RESTAURANT",   mark:"店" },
     // 「オーダー」はボトムタブから外し、ヘッダーのカルテアイコンから開く導線に変更（ヘア専用に見えないようにするため）
     { id:"order",      label:"カルテ",       accent:"--accent-order",      accentSoft:"--accent-order-soft",      app:"オーダーシート",   mode:"ORDER SHEET",  mark:"票" },
     { id:"about",      label:"このアプリについて", accent:"--accent-order", accentSoft:"--accent-order-soft",      app:"このアプリについて", mode:"ABOUT",       mark:"i" }
@@ -827,14 +827,6 @@
     ]
   };
 
-  var RESTAURANTS = [
-    { name:"個室イタリアン Luce",       area:"表参道", tags:["静かな個室"],           desc:"落ち着いた半個室でゆっくり会話できるイタリアン。" },
-    { name:"カウンター割烹 結", area:"銀座",   tags:["横並びカウンター席あり"], desc:"隣り合って座れる和食カウンター。初対面の緊張がほぐれやすい。" },
-    { name:"ブックカフェ Petrichor",     area:"代官山", tags:["初デート向けカフェ・ラウンジ"], desc:"明るく気軽な雰囲気で1軒目の待ち合わせにも最適。" },
-    { name:"ワインバー Nocturne",        area:"広尾",   tags:["静かな個室","横並びカウンター席あり"], desc:"照明を落とした落ち着いた空間で会話に集中できる。" },
-    { name:"テラスラウンジ Verde",       area:"六本木", tags:["初デート向けカフェ・ラウンジ"], desc:"開放的なテラス席がある、初回の顔合わせに向くラウンジ。" }
-  ];
-
   var TEXTURE_OPTS = ["軟らかい","普通","硬い"];
   var CROWN_OPTS   = ["真ん中","右","左"];
   var CURL_OPTS    = ["無し","弱い","強い"];
@@ -856,7 +848,18 @@
       dateMemo:"",
       seenFashionBadge:false,
       seenRestaurantBadge:false,
-      seenOrderBadge:false
+      seenOrderBadge:false,
+      // レストランアドバイザー（チャット形式）専用の会話ログと、ヒアリング中の条件
+      restaurantChat:{ started:false, log:[] },
+      restaurant:{
+        step:null,          // "category" | "mealtime" | "location" | "budget" | "done"
+        category:null,      // "restaurant" | "cafe"
+        mealtime:null,      // "lunch" | "dinner"（category==="restaurant"のときのみ使用）
+        location:null,      // 自由入力（駅名・エリア・路線名など）
+        budgetLabel:null,   // 画面表示用の予算ラベル
+        budgetNote:null,    // 「もっと高め」等、金額に変換できなかった補足要望
+        extraNote:null      // 結果表示後に追加された自由相談の内容
+      }
     };
     try{
       var raw = localStorage.getItem("hairRecipeState_v1");
@@ -1193,9 +1196,20 @@
     saveState();
   }
 
+  // レストランの会話・ヒアリング中の条件（カテゴリ／予算／エリアなど）を最初からやり直す
+  // （性別を切り替えたときと、レストラン画面の「最初から」ボタンの両方から呼び出す）
+  function resetRestaurantFlow(){
+    state.restaurantChat = { started:false, log:[] };
+    state.restaurant = {
+      step:null, category:null, mealtime:null,
+      location:null, budgetLabel:null, budgetNote:null, extraNote:null
+    };
+    saveState();
+  }
+
   function renderSubbar(){
     var bar = byId("subbar");
-    var showGenderToggle = (state.tab === "hair" || state.tab === "fashion");
+    var showGenderToggle = (state.tab === "hair" || state.tab === "fashion" || state.tab === "restaurant");
     if(!showGenderToggle){
       bar.hidden = true;
       bar.innerHTML = "";
@@ -1211,8 +1225,9 @@
         if(state.gender === g) return;
         state.gender = g;
         // 対象（メンズ/レディース）を切り替えたら、これまでの会話・選択結果はリセットして
-        // 新しい性別の診断フローを最初からやり直せるようにする
+        // 新しい性別の診断フローを最初からやり直せるようにする（ヘア／レストラン両方）
         resetHairFlow();
+        resetRestaurantFlow();
         render();
       });
       toggle.appendChild(b);
@@ -1228,11 +1243,20 @@
       });
       bar.appendChild(resetLink);
     }
+    if(state.tab === "restaurant"){
+      var resetLink2 = el("button","close-link","🔄 最初から");
+      resetLink2.style.marginLeft = "auto";
+      resetLink2.addEventListener("click", function(){
+        resetRestaurantFlow();
+        render();
+      });
+      bar.appendChild(resetLink2);
+    }
   }
 
   function renderComposer(){
     var bar = byId("composer");
-    bar.hidden = (state.tab !== "hair");
+    bar.hidden = (state.tab !== "hair" && state.tab !== "restaurant");
   }
 
   function render(){
@@ -1449,6 +1473,88 @@
       confirmWrap.appendChild(actions);
       return confirmWrap;
     }
+    if(entry.type === "restaurant-category-prompt"){
+      var catWrap = el("div","chip-row");
+      catWrap.style.paddingLeft = "0";
+      [["restaurant","レストラン"],["cafe","カフェ"]].forEach(function(pair){
+        var c = el("button","chip",pair[1]);
+        c.addEventListener("click", function(){ onPickRestaurantCategory(pair[0]); });
+        catWrap.appendChild(c);
+      });
+      return catWrap;
+    }
+    if(entry.type === "restaurant-mealtime-prompt"){
+      var mealWrap = el("div","chip-row");
+      mealWrap.style.paddingLeft = "0";
+      [["lunch","ランチ"],["dinner","ディナー"]].forEach(function(pair){
+        var c = el("button","chip",pair[1]);
+        c.addEventListener("click", function(){ onPickRestaurantMealtime(pair[0]); });
+        mealWrap.appendChild(c);
+      });
+      return mealWrap;
+    }
+    if(entry.type === "restaurant-budget-prompt"){
+      var budgetOuter = el("div","");
+      var bWrap = el("div","chip-row");
+      bWrap.style.paddingLeft = "0";
+      var okBtn = el("button","chip primary","この予算でOK（"+entry.defaultLabel+"）");
+      okBtn.addEventListener("click", function(){ onAcceptDefaultBudget(entry.defaultLabel); });
+      bWrap.appendChild(okBtn);
+      budgetOuter.appendChild(bWrap);
+      var hint = document.createElement("div");
+      hint.style.marginTop = "6px";
+      hint.style.fontSize = "12px";
+      hint.style.color = "var(--ink-faint)";
+      hint.textContent = "※「7000円くらい」「もっと高め」のように、下の入力欄から具体的な希望も送れます。";
+      budgetOuter.appendChild(hint);
+      return budgetOuter;
+    }
+    if(entry.type === "restaurant-result"){
+      var rWrap = el("div","catalog-wrap");
+      var badgeLabel = entry.grounded ? "Google検索連携で確認済み" : "AI提案（一部は要確認）";
+      var badge = el("span","mock-badge", ICONS.sparkle + ' <span>'+badgeLabel+'</span>');
+      badge.style.display = "inline-flex";
+      badge.style.alignItems = "center";
+      badge.querySelector("svg").style.marginRight = "3px";
+      rWrap.appendChild(badge);
+
+      var spots = entry.spots || [];
+      spots.forEach(function(spot){
+        var card = el("div","info-card");
+        var hue = hueFromString(spot.name);
+        var swatch = el("div","swatch");
+        swatch.style.background = "hsl("+hue+",30%,45%)";
+        swatch.innerHTML = ICONS.restaurant;
+        card.appendChild(swatch);
+        var body = el("div","body");
+        var candidateSelected = state.dateCandidates.indexOf(spot.name) !== -1;
+        var tipsHtml = (spot.dateTips||[]).map(function(t){ return '<div class="tag" style="display:block;margin-top:4px;">💡 '+t+'</div>'; }).join('');
+        body.innerHTML =
+          '<div class="title-row"><span class="title">'+spot.name+'</span><span style="font-size:11px;color:var(--ink-faint);">'+(spot.area||"")+'</span></div>'+
+          '<div class="desc">'+(spot.desc||"")+'</div>'+
+          (spot.unverified ? '<div class="desc" style="color:var(--ink-faint);font-size:11px;">※詳細情報は要確認です。ご予約前に店舗へご確認ください。</div>' : '') +
+          tipsHtml;
+        var btn = el("button","mini-btn" + (candidateSelected?" selected":""), candidateSelected ? "候補に追加済み" : "候補に入れる");
+        btn.style.marginTop = "9px";
+        btn.addEventListener("click", function(){
+          if(state.dateCandidates.indexOf(spot.name)===-1){
+            state.dateCandidates.push(spot.name);
+            toast("オーダーシートのメモに追加しました。");
+          }else{
+            state.dateCandidates = state.dateCandidates.filter(function(n){ return n!==spot.name; });
+          }
+          saveState();
+          render();
+        });
+        body.appendChild(btn);
+        card.appendChild(body);
+        rWrap.appendChild(card);
+      });
+      if(spots.length===0){
+        rWrap.appendChild(emptyState("条件に合うお店が見つかりませんでした。エリアや予算を変えて、下の入力欄から再度相談してみてください。", ICONS.restaurant));
+      }
+      return rWrap;
+    }
     return el("div","");
   }
 
@@ -1475,7 +1581,11 @@
     var text = input.value.trim();
     if(!text) return;
     input.value = "";
-    submitQuickText(text);
+    if(state.tab === "restaurant"){
+      submitRestaurantFreeText(text);
+    }else{
+      submitQuickText(text);
+    }
   }
 
   // メニューのボタン（既定の選択肢）やフリー入力のテキストを、その場で送信・実行する共通処理
@@ -1665,63 +1775,177 @@
   }
 
   /* =========================================================
-     9. レストランアドバイザー
+     9. レストランアドバイザー（チャット形式）
+     固定の店舗データベースは持たず、ヒアリングした条件をもとに
+     /api/restaurant-recommend（Gemini API + Google検索連携）へ都度問い合わせる。
   ========================================================= */
-  var restaurantFilters = [];
-  function renderRestaurantTab(screen){
-    screen.appendChild(el("div","section-label","婚活・デート向け検索条件"));
-    var allTags = ["横並びカウンター席あり","静かな個室","初デート向けカフェ・ラウンジ"];
-    var filterRow = el("div","filter-row");
-    allTags.forEach(function(tag){
-      var active = restaurantFilters.indexOf(tag) !== -1;
-      var chip = el("button","chip" + (active?" selected":""), tag);
-      chip.addEventListener("click", function(){
-        var pos = restaurantFilters.indexOf(tag);
-        if(pos===-1) restaurantFilters.push(tag); else restaurantFilters.splice(pos,1);
-        render();
-      });
-      filterRow.appendChild(chip);
-    });
-    screen.appendChild(filterRow);
+  function pushRestaurantLog(entry){ state.restaurantChat.log.push(entry); saveState(); }
 
-    var results = RESTAURANTS.filter(function(r){
-      if(restaurantFilters.length===0) return true;
-      return restaurantFilters.every(function(f){ return r.tags.indexOf(f)!==-1; });
-    });
-
-    screen.appendChild(el("div","section-label", results.length + "件のお店"));
-    results.forEach(function(r){
-      var card = el("div","info-card");
-      var hue = hueFromString(r.name);
-      var swatch = el("div","swatch");
-      swatch.style.background = "hsl("+hue+",30%,45%)";
-      swatch.innerHTML = ICONS.restaurant;
-      card.appendChild(swatch);
-      var body = el("div","body");
-      var candidateSelected = state.dateCandidates.indexOf(r.name) !== -1;
-      body.innerHTML =
-        '<div class="title-row"><span class="title">'+r.name+'</span><span style="font-size:11px;color:var(--ink-faint);">'+r.area+'</span></div>'+
-        '<div class="desc">'+r.desc+'</div>'+
-        '<div class="tags">'+r.tags.map(function(t){return '<span class="tag">'+t+'</span>';}).join('')+'</div>';
-      var btn = el("button","mini-btn" + (candidateSelected?" selected":""), candidateSelected ? "候補に追加済み" : "候補に入れる");
-      btn.style.marginTop = "9px";
-      btn.addEventListener("click", function(){
-        if(state.dateCandidates.indexOf(r.name)===-1){
-          state.dateCandidates.push(r.name);
-          toast("オーダーシートのメモに追加しました。");
-        }else{
-          state.dateCandidates = state.dateCandidates.filter(function(n){ return n!==r.name; });
-        }
-        saveState();
-        render();
-      });
-      body.appendChild(btn);
-      card.appendChild(body);
-      screen.appendChild(card);
-    });
-    if(results.length===0){
-      screen.appendChild(emptyState("条件に合うお店が見つかりませんでした。条件を減らしてお試しください。", ICONS.restaurant));
+  function ensureRestaurantGreeting(){
+    if(!state.restaurantChat.started){
+      state.restaurantChat.started = true;
+      pushRestaurantLog({ type:"ai", text:"デートにぴったりのお店を一緒に探しましょう！まずは、レストランとカフェ、どちらのイメージですか？" });
+      pushRestaurantLog({ type:"restaurant-category-prompt" });
+      state.restaurant.step = "category";
+      saveState();
     }
+  }
+
+  function renderRestaurantTab(screen){
+    ensureRestaurantGreeting();
+    var timeline = el("div","");
+    timeline.style.display = "flex";
+    timeline.style.flexDirection = "column";
+    timeline.style.gap = "12px";
+    state.restaurantChat.log.forEach(function(entry, idx){
+      timeline.appendChild(renderChatEntry(entry, idx));
+    });
+    screen.appendChild(timeline);
+    screen.scrollTop = screen.scrollHeight;
+  }
+
+  function onPickRestaurantCategory(cat){
+    pushRestaurantLog({ type:"user", text: cat==="restaurant" ? "レストラン" : "カフェ" });
+    state.restaurant.category = cat;
+    if(cat === "restaurant"){
+      pushRestaurantLog({ type:"ai", text:"ランチとディナー、どちらの想定ですか？" });
+      pushRestaurantLog({ type:"restaurant-mealtime-prompt" });
+      state.restaurant.step = "mealtime";
+      saveState();
+      render();
+    }else{
+      state.restaurant.mealtime = null;
+      saveState();
+      proceedToRestaurantLocationStep();
+    }
+  }
+
+  function onPickRestaurantMealtime(meal){
+    pushRestaurantLog({ type:"user", text: meal==="lunch" ? "ランチ" : "ディナー" });
+    state.restaurant.mealtime = meal;
+    saveState();
+    proceedToRestaurantLocationStep();
+  }
+
+  function proceedToRestaurantLocationStep(){
+    pushRestaurantLog({ type:"ai", text:"ありがとうございます！エリアを教えてください（駅名・エリア名・路線名など、わかる範囲でOKです）。下の入力欄からどうぞ。" });
+    state.restaurant.step = "location";
+    saveState();
+    render();
+  }
+
+  // カテゴリ／ランチ・ディナーに応じたデフォルト予算（🔧 差し替えポイント：相場が変わったら調整）
+  function defaultRestaurantBudgetLabel(){
+    var r = state.restaurant;
+    if(r.category === "restaurant" && r.mealtime === "dinner") return "4,000〜5,000円/人（お飲み物込み）";
+    return "2,000円くらい";
+  }
+
+  function proceedToRestaurantBudgetStep(){
+    var label = defaultRestaurantBudgetLabel();
+    pushRestaurantLog({ type:"ai", text:"予算の目安はこちらでいかがでしょう？具体的なご希望があれば入力欄から教えてください。" });
+    pushRestaurantLog({ type:"restaurant-budget-prompt", defaultLabel: label });
+    state.restaurant.step = "budget";
+    saveState();
+    render();
+  }
+
+  function onAcceptDefaultBudget(label){
+    pushRestaurantLog({ type:"user", text:"この予算でOK（"+label+"）" });
+    state.restaurant.budgetLabel = label;
+    state.restaurant.budgetNote = null;
+    runRestaurantSearch();
+  }
+
+  // 自由入力から予算の意図を軽く読み取る簡易パーサー（🔧 実運用では自然言語理解をAPI側に任せる想定）
+  function parseRestaurantBudgetIntent(text){
+    var numMatch = text.match(/([0-9０-９,，]{3,6})\s*円/);
+    if(numMatch){
+      var normalized = numMatch[1]
+        .replace(/[０-９]/g, function(d){ return String.fromCharCode(d.charCodeAt(0)-0xFEE0); })
+        .replace(/[,，]/g,"");
+      return { label: Number(normalized).toLocaleString() + "円くらい", note:null };
+    }
+    if(/高め|高く|贅沢|奮発/.test(text)) return { label:null, note:"予算はもっと高めが希望" };
+    if(/安め|安く|リーズナブル|抑えめ/.test(text)) return { label:null, note:"予算はもっと控えめが希望" };
+    return null;
+  }
+
+  function submitRestaurantFreeText(text){
+    pushRestaurantLog({ type:"user", text: text });
+    var step = state.restaurant.step;
+    if(step === "location"){
+      state.restaurant.location = text;
+      saveState();
+      proceedToRestaurantBudgetStep();
+      return;
+    }
+    if(step === "budget"){
+      var parsed = parseRestaurantBudgetIntent(text);
+      if(parsed){
+        state.restaurant.budgetLabel = parsed.label || defaultRestaurantBudgetLabel();
+        state.restaurant.budgetNote = parsed.note;
+      }else{
+        state.restaurant.budgetLabel = defaultRestaurantBudgetLabel();
+        state.restaurant.budgetNote = text;
+      }
+      saveState();
+      runRestaurantSearch();
+      return;
+    }
+    // 結果表示後の追加相談（雰囲気の希望など）は、条件に追記して再検索する
+    state.restaurant.extraNote = text;
+    saveState();
+    runRestaurantSearch();
+  }
+
+  // 通信エラー・APIキー未設定時のフォールバック用モックデータ
+  var MOCK_RESTAURANT_SPOTS = [
+    { name:"個室イタリアン Luce",   area:"表参道", desc:"落ち着いた半個室でゆっくり会話できるイタリアン。", dateTips:["半個室あり。予約時に指定するのがおすすめ"], unverified:true },
+    { name:"カウンター割烹 結",     area:"銀座",   desc:"隣り合って座れる和食カウンター。初対面の緊張がほぐれやすい。", dateTips:["横並びのカウンター席で初デート向き"], unverified:true },
+    { name:"ワインバー Nocturne",   area:"広尾",   desc:"照明を落とした落ち着いた空間で会話に集中できる。", dateTips:["ワインの種類が豊富。お酒好きな相手におすすめ"], unverified:true }
+  ];
+
+  // /api/restaurant-recommend（Gemini API + Google検索連携=grounding優先）に問い合わせる。
+  // APIキー未設定・通信エラー時は、従来のモックにフォールバックする。
+  async function fetchRestaurantRecommendation(params){
+    try{
+      var res = await fetch("/api/restaurant-recommend", {
+        method:"POST",
+        headers:{ "Content-Type":"application/json" },
+        body: JSON.stringify(params)
+      });
+      if(res.ok){
+        var data = await res.json();
+        if(data && Array.isArray(data.spots)){
+          return { spots:data.spots, grounded: !!data.grounded, mock:false };
+        }
+      }
+    }catch(e){ /* 通信エラー時は下のモックにフォールバック */ }
+    await sleep(900);
+    return { spots: MOCK_RESTAURANT_SPOTS, grounded:false, mock:true };
+  }
+
+  async function runRestaurantSearch(){
+    pushRestaurantLog({ type:"typing" });
+    render();
+    var r = state.restaurant;
+    var result = await fetchRestaurantRecommendation({
+      gender: state.gender,
+      category: r.category,
+      mealtime: r.mealtime,
+      location: r.location,
+      budgetLabel: r.budgetLabel,
+      budgetNote: r.budgetNote,
+      extraNote: r.extraNote
+    });
+    state.restaurantChat.log = state.restaurantChat.log.filter(function(x){ return x.type!=="typing"; });
+    pushRestaurantLog({ type:"ai", text:"こちらのお店はいかがでしょう？デート視点のポイントも添えています。" });
+    pushRestaurantLog({ type:"restaurant-result", spots:result.spots, grounded:result.grounded });
+    state.restaurant.step = "done";
+    bellHasNote = true;
+    saveState();
+    render();
   }
 
   /* =========================================================
@@ -1864,7 +2088,7 @@
     if(state.outfit){
       screen.appendChild(el("div","advice-box", "「"+state.outfit+"」を選択中です。"));
     }else{
-      var goFashion = el("button","mini-btn","ファッションアドバイザーへ");
+      var goFashion = el("button","mini-btn","ファッション相談へ");
       goFashion.addEventListener("click", function(){ state.tab="fashion"; render(); });
       var noOutfit = el("div","empty-state");
       noOutfit.style.padding = "10px 4px";
