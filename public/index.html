@@ -1890,13 +1890,9 @@
     pushLog({ type:"user", text:"自分に似合うか試す（ヘアマッチング）" });
     state.pendingCompositeStyle = style;
     saveState();
-    if(state.userSelfiePhoto){
-      runHairComposite(style, state.userSelfiePhoto);
-    }else{
-      pushLog({ type:"ai", text:"自撮り写真をアップしてください。あなたの顔に、選んだ髪型を合成してご確認いただけます。" });
-      pushLog({ type:"hair-composite-upload-prompt" });
-      render();
-    }
+    pushLog({ type:"ai", text:"自撮り写真をアップしてください。あなたの顔に、選んだ髪型を合成してご確認いただけます。" });
+    pushLog({ type:"hair-composite-upload-prompt" });
+    render();
   }
 
   byId("fileHairComposite").addEventListener("change", function(e){
