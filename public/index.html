@@ -882,8 +882,6 @@
       userSelfiePhoto:null, // 「自分に似合うか試す」用の自撮り写真（この端末内のみ保持）
       pendingCompositeStyle:null, // 自撮りアップロード待ちの間、どの髪型で試そうとしていたかを一時保持
       outfit:null,
-      dateCandidates:[],
-      dateMemo:"",
       seenFashionBadge:false,
       seenRestaurantBadge:false,
       seenOrderBadge:false,
@@ -1072,7 +1070,7 @@
   // それをそのままオーダーシートの文言に反映する（カタログに縛られない）
   var ANALYSIS_LENGTHS  = ["ショート","ミディアム","ロング"];
   var ANALYSIS_BANGS    = ["シースルーバング","流し前髪","前髪なし","ぱっつん前髪","センターパート"];
-  var ANALYSIS_COLORS   = ["ベージュ","暗髪ブラウン","アッシュグレー","黒髪"];
+  var ANALYSIS_COLORS   = ["黒髪","暗髪ブラウン","赤みブラウン","ベージュ","暗めゴールド","明るめ金髪","オレンジ系ゴールド","アッシュグレー"];
   var ANALYSIS_TEXTURES = ["ストレート","ゆるふわウェーブ","強めパーマ","無造作ウェーブ"];
   function pickRandom(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
 
@@ -1730,25 +1728,11 @@
         swatch.innerHTML = ICONS.restaurant;
         card.appendChild(swatch);
         var body = el("div","body");
-        var candidateSelected = state.dateCandidates.indexOf(spot.name) !== -1;
         var tipsHtml = (spot.dateTips||[]).map(function(t){ return '<div class="tag" style="display:block;margin-top:4px;">💡 '+t+'</div>'; }).join('');
         body.innerHTML =
           '<div class="title-row"><span class="title">'+spot.name+'</span><span style="font-size:11px;color:var(--ink-faint);">'+(spot.area||"")+'</span></div>'+
           '<div class="desc">'+(spot.desc||"")+'</div>'+
           tipsHtml;
-        var btn = el("button","mini-btn" + (candidateSelected?" selected":""), candidateSelected ? "候補に追加済み" : "候補に入れる");
-        btn.style.marginTop = "9px";
-        btn.addEventListener("click", function(){
-          if(state.dateCandidates.indexOf(spot.name)===-1){
-            state.dateCandidates.push(spot.name);
-            toast("オーダーシートのメモに追加しました。");
-          }else{
-            state.dateCandidates = state.dateCandidates.filter(function(n){ return n!==spot.name; });
-          }
-          saveState();
-          render();
-        });
-        body.appendChild(btn);
         card.appendChild(body);
         rWrap.appendChild(card);
       });
