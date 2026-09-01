@@ -908,7 +908,10 @@
       var raw = localStorage.getItem("hairRecipeState_v1");
       if(raw){
         var parsed = JSON.parse(raw);
-        return Object.assign(fallback, parsed);
+        var merged = Object.assign(fallback, parsed);
+        // アクセスのたびに初期画面はヘアアドバイザーにする（前回タブは記憶しない）
+        merged.tab = "hair";
+        return merged;
       }
     }catch(e){ /* storage unavailable: use fallback silently */ }
     return fallback;
