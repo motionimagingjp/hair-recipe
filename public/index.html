@@ -1563,6 +1563,29 @@
       compBub.innerHTML =
         '<div style="margin-bottom:8px;">「'+entry.styleName+'」で、あなたの雰囲気を確認できました！</div>'+
         '<img src="'+entry.image+'" alt="AI合成イメージ" style="width:100%;border-radius:10px;display:block;">';
+      // 生成結果を見たあと、別の髪型でも試せるよう最初の2ボタンをその場に再表示する
+      var retryRow = el("div","chip-row");
+      retryRow.style.paddingLeft = "0";
+      retryRow.style.marginTop = "10px";
+      var retryWantBtn = el("button","chip primary", "🖼️ なりたい髪型を添付");
+      retryWantBtn.addEventListener("click", function(){
+        resetHairFlow();
+        render();
+        byId("fileScreenshot").click();
+      });
+      retryRow.appendChild(retryWantBtn);
+      var retryUpBtn = el("button","chip primary", ICONS.camera + ' <span style="margin-left:5px;">自撮りで診断する</span>');
+      retryUpBtn.style.display = "inline-flex";
+      retryUpBtn.style.alignItems = "center";
+      retryUpBtn.querySelector("svg").style.width = "14px";
+      retryUpBtn.querySelector("svg").style.height = "14px";
+      retryUpBtn.addEventListener("click", function(){
+        resetHairFlow();
+        render();
+        byId("fileFaceShape").click();
+      });
+      retryRow.appendChild(retryUpBtn);
+      compBub.appendChild(retryRow);
       compWrap.appendChild(compBub);
       return compWrap;
     }
