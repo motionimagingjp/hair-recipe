@@ -1915,7 +1915,7 @@
         pushLog({ type:"hair-composite-result", image:data.image, styleName:style.name });
       }else{
         console.error("hairstyle composite failed:", res.status, data.error);
-        pushLog({ type:"ai", text:"画像の生成に失敗しました。\n\n【エラー詳細（デバッグ用）】\n"+(data.error || ("status: "+res.status)) });
+        pushLog({ type:"ai", text:"画像の生成に失敗しました。時間をおいて再度お試しください。" });
       }
     }catch(e){
       state.chat.log = state.chat.log.filter(function(x){ return x.type!=="typing"; });
