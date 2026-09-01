@@ -1765,8 +1765,12 @@
           '<div class="title-row"><span class="title">'+spot.name+'</span><span style="font-size:11px;color:var(--ink-faint);">'+(spot.area||"")+'</span></div>'+
           '<div class="desc">'+(spot.desc||"")+'</div>'+
           tipsHtml;
+        var actionsRow = el("div","");
+        actionsRow.style.display = "flex";
+        actionsRow.style.flexWrap = "wrap";
+        actionsRow.style.gap = "8px";
+        actionsRow.style.marginTop = "9px";
         var btn = el("button","mini-btn" + (candidateSelected?" selected":""), candidateSelected ? "候補に追加済み" : "候補に入れる");
-        btn.style.marginTop = "9px";
         btn.addEventListener("click", function(){
           if(state.dateCandidates.indexOf(spot.name)===-1){
             state.dateCandidates.push(spot.name);
@@ -1777,7 +1781,17 @@
           saveState();
           render();
         });
-        body.appendChild(btn);
+        actionsRow.appendChild(btn);
+        var mapQuery = encodeURIComponent([spot.name, spot.area].filter(Boolean).join(" "));
+        var mapLink = el("a","mini-btn","📍 地図で見る");
+        mapLink.href = "https://www.google.com/maps/search/?api=1&query=" + mapQuery;
+        mapLink.target = "_blank";
+        mapLink.rel = "noopener noreferrer";
+        mapLink.style.textDecoration = "none";
+        mapLink.style.display = "inline-flex";
+        mapLink.style.alignItems = "center";
+        actionsRow.appendChild(mapLink);
+        body.appendChild(actionsRow);
         card.appendChild(body);
         rWrap.appendChild(card);
       });
