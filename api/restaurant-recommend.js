@@ -27,6 +27,7 @@ export default async function handler(req, res) {
       category,     // "restaurant" | "cafe"
       mealtime,     // "lunch" | "dinner"（category==="restaurant"のときのみ意味を持つ）
       location,     // 自由入力（駅名・エリア・路線名など）
+      cuisine,      // 料理ジャンル（例:"韓国料理"）。フロント側で地名＋国名から自動判定される場合がある
       budgetLabel,  // 画面表示用の予算ラベル（例:"4,000〜5,000円/人（お飲み物込み）"）
       budgetNote,   // 「もっと高め」等、金額に変換できなかった補足要望
       extraNote     // 結果表示後に追加された自由相談の内容
@@ -50,6 +51,7 @@ export default async function handler(req, res) {
     const conditionLines = [
       "・カテゴリ: " + categoryLabel + (mealtimeLabel ? "（" + mealtimeLabel + "）" : ""),
       "・エリア: " + (location || "指定なし"),
+      cuisine ? "・料理ジャンル: " + cuisine : null,
       "・予算目安（お一人あたり）: " + (budgetLabel || "指定なし") + (budgetNote ? "（補足: " + budgetNote + "）" : ""),
       "・相談者: " + genderLabel,
       extraNote ? "・追加の希望: " + extraNote : null
