@@ -2663,37 +2663,79 @@
     return null;
   }
 
+  // 「こんにちは」「ありがとう」のような、レストラン検索とは無関係な挨拶・雑談を検出する。
+  // これをエリア名として受け取ってしまうと、ヒアリングが変な方向に進んでしまうため。
+  function looksLikeGreetingOrChitchat(text){
+    var t = text.trim();
+    return /^(こんにちは|こんばんは|おはよう(ございます)?|ありがとう(ございます)?|よろしく(お願いします)?|はじめまして|どうも|了解|わかりました|わかりません|わからない|なんでもいい|何でもいい|hello|hi+|hey|thanks?|thank\s*you|test|テスト)[!！。、\s]*$/i.test(t);
+  }
+
+  // 結果表示後などに再度入力された短い文が「別のエリア・料理ジャンルで探し直したい」という
+  // 意図なのか、それとも「もっと落ち着いた感じで」のような自由文の追加希望なのかを見分けるための
+  // 簡易ゲート。長文や、好み・要望を表す言い回しを含む場合は追加希望（ノート）として扱う。
+  function looksLikeShortLocationQuery(text){
+    if(text.length > 20) return false;
+    if(/[0-9０-９]/.test(text)) return false; // 金額（予算）の可能性が高いので除外
+    if(looksLikeGreetingOrChitchat(text)) return false;
+    if(/円|です|ます|ください|たい|ほしい|にして|の方|でも|なら|じゃない|ではない|好き|嫌い|苦手|感じ|雰囲気|希望|もっと|高め|安め|高く|安く|リーズナブル|贅沢|奮発|抑えめ/.test(text)) return false;
+    return true;
+  }
+
+  // エリア・料理ジャンルの入力として解釈できた場合は true を返し、その場で処理まで済ませる
+  // （メッセージ表示・状態更新・render/再検索）。解釈できなければ false を返し、呼び出し元で
+  // 従来通りの扱い（自由入力の追加希望など）にフォールバックできるようにする。
+  // isInitialAsk: true＝最初の「エリアを教えてください」への回答、false＝それ以外の場面
+  function tryInterpretRestaurantLocationInput(text, isInitialAsk){
+    if(!isInitialAsk && !looksLikeShortLocationQuery(text)) return false;
+
+    var detected = detectRestaurantCuisine(text);
+    if(detected && detected.area){
+      // 例：「川越 韓国」→ エリア「川越」＋料理ジャンル「韓国料理」と解釈して進める
+      state.restaurant.location = detected.area;
+      state.restaurant.cuisine = detected.cuisine;
+      saveState();
+      if(isInitialAsk){ proceedToRestaurantBudgetStep(); }
+      else{ state.restaurant.extraNote = null; saveState(); runRestaurantSearch(); }
+      return true;
+    }
+    if(detected && !detected.area){
+      // 料理ジャンルらしき語はあるが、エリアが読み取れない（例：「韓国」だけ）
+      pushRestaurantLog({ type:"ai", text:"場所が読み取れませんでした。場所と料理名を一緒に入れてください（例：新宿のタイ料理）。" });
+      render();
+      return true;
+    }
+
+    var tokens = text.split(/[\s、,，]+/).filter(Boolean);
+    if(tokens.length >= 2){
+      if(!isInitialAsk) return false; // 通常の自由文（追加の希望）である可能性が高いため判定しない
+      // 料理ジャンルが特定できないまま複数の語が入力された場合は、意図が読み取りにくいため確認する
+      pushRestaurantLog({ type:"ai", text:"うまく認識できませんでした。場所と料理名を入れてください（例：新宿のタイ料理）。" });
+      render();
+      return true;
+    }
+
+    // 単語1つでも、「こんにちは」等レストラン検索と無関係な挨拶・雑談はエリア名として扱わない
+    if(looksLikeGreetingOrChitchat(text)){
+      if(!isInitialAsk) return false; // 結果表示後なら、従来通り追加の希望として扱う
+      pushRestaurantLog({ type:"ai", text:"すみません、うまく聞き取れませんでした。エリア名を教えてください（例：新宿、渋谷など）。" });
+      render();
+      return true;
+    }
+
+    // それ以外の単語1つ（駅名・エリア名など）は、エリアとして扱う
+    state.restaurant.location = text;
+    state.restaurant.cuisine = null;
+    saveState();
+    if(isInitialAsk){ proceedToRestaurantBudgetStep(); }
+    else{ state.restaurant.extraNote = null; saveState(); runRestaurantSearch(); }
+    return true;
+  }
+
   function submitRestaurantFreeText(text){
     pushRestaurantLog({ type:"user", text: text });
     var step = state.restaurant.step;
     if(step === "location"){
-      var detected = detectRestaurantCuisine(text);
-      if(detected && detected.area){
-        // 例：「川越 韓国」→ エリア「川越」＋料理ジャンル「韓国料理」と解釈して進める
-        state.restaurant.location = detected.area;
-        state.restaurant.cuisine = detected.cuisine;
-        saveState();
-        proceedToRestaurantBudgetStep();
-        return;
-      }
-      if(detected && !detected.area){
-        // 料理ジャンルらしき語はあるが、エリアが読み取れない（例：「韓国」だけ）
-        pushRestaurantLog({ type:"ai", text:"場所が読み取れませんでした。場所と料理名を一緒に入れてください（例：新宿のタイ料理）。" });
-        render();
-        return;
-      }
-      var locationTokens = text.split(/[\s、,，]+/).filter(Boolean);
-      if(locationTokens.length >= 2){
-        // 料理ジャンルが特定できないまま複数の語が入力された場合は、意図が読み取りにくいため確認する
-        pushRestaurantLog({ type:"ai", text:"うまく認識できませんでした。場所と料理名を入れてください（例：新宿のタイ料理）。" });
-        render();
-        return;
-      }
-      // 単語1つ（駅名・エリア名など）は、これまで通りエリアとして扱う
-      state.restaurant.location = text;
-      state.restaurant.cuisine = null;
-      saveState();
-      proceedToRestaurantBudgetStep();
+      tryInterpretRestaurantLocationInput(text, true);
       return;
     }
     if(step === "budget"){
@@ -2709,7 +2751,9 @@
       runRestaurantSearch();
       return;
     }
-    // 結果表示後の追加相談（雰囲気の希望など）は、条件に追記して再検索する
+    // 結果表示後の入力：まず「別のエリア・料理ジャンルで探し直したい」という意図かどうかを確認し、
+    // そうでなければ従来通り、追加の希望（雰囲気の希望など）として条件に追記して再検索する。
+    if(tryInterpretRestaurantLocationInput(text, false)) return;
     state.restaurant.extraNote = text;
     saveState();
     runRestaurantSearch();
