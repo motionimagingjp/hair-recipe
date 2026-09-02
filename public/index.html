@@ -2651,7 +2651,8 @@
 
   // 自由入力から予算の意図を軽く読み取る簡易パーサー（🔧 実運用では自然言語理解をAPI側に任せる想定）
   function parseRestaurantBudgetIntent(text){
-    var numMatch = text.match(/([0-9０-９,，]{3,6})\s*円/);
+    // 「円」を付けずに数字だけ（例：3000）で来た場合も、この予算ステップでは金額入力とみなす
+    var numMatch = text.match(/([0-9０-９,，]{3,6})\s*円?/);
     if(numMatch){
       var normalized = numMatch[1]
         .replace(/[０-９]/g, function(d){ return String.fromCharCode(d.charCodeAt(0)-0xFEE0); })
