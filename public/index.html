@@ -2732,6 +2732,41 @@
     return true;
   }
 
+  // 「新大久保」「韓国料理」だけのような、エリア・料理ジャンルらしき一言が
+  // カテゴリ／ランチ・ディナーを決める前に来た場合、律儀に一つずつ聞き返すのではなく、
+  // 足りない条件（カテゴリ＝レストラン、ランチ/ディナー＝ディナー、予算＝既定値）を
+  // こちらで補って即座におすすめを提案する。判断できなければ false を返す。
+  function tryQuickRestaurantSearch(text){
+    var detected = detectRestaurantCuisine(text);
+    var location, cuisine;
+    if(detected){
+      // 「韓国料理」のように料理ジャンルだけでエリアが読み取れなくても、
+      // エリア指定なしのまま検索を続行する（Gemini側で「指定なし」として扱われる）
+      location = detected.area || null;
+      cuisine = detected.cuisine;
+    }else{
+      var tokens = text.split(/[\s、,，]+/).filter(Boolean);
+      if(tokens.length !== 1) return false;
+      if(!looksLikeShortLocationQuery(text)) return false; // 挨拶・要望・金額らしき文は対象外
+      location = text;
+      cuisine = null;
+    }
+
+    state.restaurant.location = location;
+    state.restaurant.cuisine = cuisine;
+    var categoryDefaulted = false, mealtimeDefaulted = false;
+    if(!state.restaurant.category){ state.restaurant.category = "restaurant"; categoryDefaulted = true; }
+    if(state.restaurant.category === "restaurant" && !state.restaurant.mealtime){ state.restaurant.mealtime = "dinner"; mealtimeDefaulted = true; }
+    if(!state.restaurant.budgetLabel){ state.restaurant.budgetLabel = defaultRestaurantBudgetLabel(); }
+    saveState();
+
+    var introText = mealtimeDefaulted
+      ? "ディナー想定で、おすすめのお店はこちらです！ランチをご希望でしたら教えてください。"
+      : (categoryDefaulted ? "レストランでおすすめのお店を探しました！カフェをご希望でしたら教えてください。" : null);
+    runRestaurantSearch(introText);
+    return true;
+  }
+
   function submitRestaurantFreeText(text){
     pushRestaurantLog({ type:"user", text: text });
     var step = state.restaurant.step;
@@ -2741,6 +2776,7 @@
     if(step === "category"){
       if(/カフェ/.test(text)){ onPickRestaurantCategory("cafe"); return; }
       if(/レストラン/.test(text)){ onPickRestaurantCategory("restaurant"); return; }
+      if(tryQuickRestaurantSearch(text)) return;
       pushRestaurantLog({ type:"ai", text:"レストランかカフェ、どちらのイメージか上のボタンからお選びください。" });
       render();
       return;
@@ -2748,6 +2784,7 @@
     if(step === "mealtime"){
       if(/ランチ|昼/.test(text)){ onPickRestaurantMealtime("lunch"); return; }
       if(/ディナー|夜/.test(text)){ onPickRestaurantMealtime("dinner"); return; }
+      if(tryQuickRestaurantSearch(text)) return;
       pushRestaurantLog({ type:"ai", text:"ランチかディナー、どちらの想定か上のボタンからお選びください。" });
       render();
       return;
@@ -2807,7 +2844,7 @@
     return { spots: MOCK_RESTAURANT_SPOTS, grounded:false, mock:true };
   }
 
-  async function runRestaurantSearch(){
+  async function runRestaurantSearch(introText){
     pushRestaurantLog({ type:"typing" });
     render();
     var r = state.restaurant;
@@ -2822,7 +2859,7 @@
       extraNote: r.extraNote
     });
     state.restaurantChat.log = state.restaurantChat.log.filter(function(x){ return x.type!=="typing"; });
-    pushRestaurantLog({ type:"ai", text:"こちらのお店はいかがでしょう？デート視点のポイントも添えています。" });
+    pushRestaurantLog({ type:"ai", text: introText || "こちらのお店はいかがでしょう？デート視点のポイントも添えています。" });
     pushRestaurantLog({ type:"restaurant-result", spots:result.spots, grounded:result.grounded, mock:result.mock });
     state.restaurant.step = "done";
     bellHasNote = true;
