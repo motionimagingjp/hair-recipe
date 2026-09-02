@@ -2734,6 +2734,23 @@
   function submitRestaurantFreeText(text){
     pushRestaurantLog({ type:"user", text: text });
     var step = state.restaurant.step;
+    // category/mealtime がまだ決まっていない段階で自由入力があった場合、
+    // これを無条件にエリア扱いして検索へ進めてしまうと、category未指定のままAPIを呼んでしまい
+    // （必ず失敗してデモ表示になる）事故のもとになる。ここでしっかり吸収する。
+    if(step === "category"){
+      if(/カフェ/.test(text)){ onPickRestaurantCategory("cafe"); return; }
+      if(/レストラン/.test(text)){ onPickRestaurantCategory("restaurant"); return; }
+      pushRestaurantLog({ type:"ai", text:"レストランかカフェ、どちらのイメージか上のボタンからお選びください。" });
+      render();
+      return;
+    }
+    if(step === "mealtime"){
+      if(/ランチ|昼/.test(text)){ onPickRestaurantMealtime("lunch"); return; }
+      if(/ディナー|夜/.test(text)){ onPickRestaurantMealtime("dinner"); return; }
+      pushRestaurantLog({ type:"ai", text:"ランチかディナー、どちらの想定か上のボタンからお選びください。" });
+      render();
+      return;
+    }
     if(step === "location"){
       tryInterpretRestaurantLocationInput(text, true);
       return;
@@ -2751,7 +2768,8 @@
       runRestaurantSearch();
       return;
     }
-    // 結果表示後の入力：まず「別のエリア・料理ジャンルで探し直したい」という意図かどうかを確認し、
+    // ここに到達するのは基本的に step === "done"（検索結果が出た後）の場合のみ。
+    // まず「別のエリア・料理ジャンルで探し直したい」という意図かどうかを確認し、
     // そうでなければ従来通り、追加の希望（雰囲気の希望など）として条件に追記して再検索する。
     if(tryInterpretRestaurantLocationInput(text, false)) return;
     state.restaurant.extraNote = text;
