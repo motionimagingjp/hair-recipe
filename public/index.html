@@ -2663,12 +2663,20 @@
     return null;
   }
 
+  // 「こんにちは」「ありがとう」のような、レストラン検索とは無関係な挨拶・雑談を検出する。
+  // これをエリア名として受け取ってしまうと、ヒアリングが変な方向に進んでしまうため。
+  function looksLikeGreetingOrChitchat(text){
+    var t = text.trim();
+    return /^(こんにちは|こんばんは|おはよう(ございます)?|ありがとう(ございます)?|よろしく(お願いします)?|はじめまして|どうも|了解|わかりました|わかりません|わからない|なんでもいい|何でもいい|hello|hi+|hey|thanks?|thank\s*you|test|テスト)[!！。、\s]*$/i.test(t);
+  }
+
   // 結果表示後などに再度入力された短い文が「別のエリア・料理ジャンルで探し直したい」という
   // 意図なのか、それとも「もっと落ち着いた感じで」のような自由文の追加希望なのかを見分けるための
   // 簡易ゲート。長文や、好み・要望を表す言い回しを含む場合は追加希望（ノート）として扱う。
   function looksLikeShortLocationQuery(text){
     if(text.length > 20) return false;
     if(/[0-9０-９]/.test(text)) return false; // 金額（予算）の可能性が高いので除外
+    if(looksLikeGreetingOrChitchat(text)) return false;
     if(/円|です|ます|ください|たい|ほしい|にして|の方|でも|なら|じゃない|ではない|好き|嫌い|苦手|感じ|雰囲気|希望|もっと|高め|安め|高く|安く|リーズナブル|贅沢|奮発|抑えめ/.test(text)) return false;
     return true;
   }
@@ -2706,7 +2714,15 @@
       return true;
     }
 
-    // 単語1つ（駅名・エリア名など）は、エリアとして扱う
+    // 単語1つでも、「こんにちは」等レストラン検索と無関係な挨拶・雑談はエリア名として扱わない
+    if(looksLikeGreetingOrChitchat(text)){
+      if(!isInitialAsk) return false; // 結果表示後なら、従来通り追加の希望として扱う
+      pushRestaurantLog({ type:"ai", text:"すみません、うまく聞き取れませんでした。エリア名を教えてください（例：新宿、渋谷など）。" });
+      render();
+      return true;
+    }
+
+    // それ以外の単語1つ（駅名・エリア名など）は、エリアとして扱う
     state.restaurant.location = text;
     state.restaurant.cuisine = null;
     saveState();
