@@ -1743,7 +1743,12 @@
     }
     if(entry.type === "restaurant-result"){
       var rWrap = el("div","catalog-wrap");
-      var badgeLabel = entry.grounded ? "Google検索連携で確認済み" : "AI提案（詳細情報は要確認です。ご予約前に店舗へご確認ください。）";
+      // API呼び出しに失敗した場合、これまでは実際の提案と見分けがつかないまま
+      // サンプルの固定データ（MOCK_RESTAURANT_SPOTS）を表示してしまっていたため、
+      // 「デモ表示中」であることが必ずわかるようにバッジを分ける。
+      var badgeLabel = entry.mock
+        ? "⚠️ デモ表示中（APIエラーのため仮のお店を表示しています。実際の検索結果ではありません）"
+        : (entry.grounded ? "Google検索連携で確認済み" : "AI提案（詳細情報は要確認です。ご予約前に店舗へご確認ください。）");
       var badge = el("span","mock-badge", ICONS.sparkle + ' <span>'+badgeLabel+'</span>');
       badge.style.display = "inline-flex";
       badge.style.alignItems = "center";
@@ -2726,13 +2731,15 @@
         headers:{ "Content-Type":"application/json" },
         body: JSON.stringify(params)
       });
-      if(res.ok){
-        var data = await res.json();
-        if(data && Array.isArray(data.spots)){
-          return { spots:data.spots, grounded: !!data.grounded, mock:false };
-        }
+      var data = await res.json().catch(function(){ return null; });
+      if(res.ok && data && Array.isArray(data.spots)){
+        return { spots:data.spots, grounded: !!data.grounded, mock:false };
       }
-    }catch(e){ /* 通信エラー時は下のモックにフォールバック */ }
+      // モックへフォールバックする前に、原因をコンソールへ残す（画面には出さない）
+      console.error("restaurant-recommend failed:", res.status, data && (data.error || data.detail));
+    }catch(e){
+      console.error("restaurant-recommend network error:", e);
+    }
     await sleep(900);
     return { spots: MOCK_RESTAURANT_SPOTS, grounded:false, mock:true };
   }
@@ -2753,7 +2760,7 @@
     });
     state.restaurantChat.log = state.restaurantChat.log.filter(function(x){ return x.type!=="typing"; });
     pushRestaurantLog({ type:"ai", text:"こちらのお店はいかがでしょう？デート視点のポイントも添えています。" });
-    pushRestaurantLog({ type:"restaurant-result", spots:result.spots, grounded:result.grounded });
+    pushRestaurantLog({ type:"restaurant-result", spots:result.spots, grounded:result.grounded, mock:result.mock });
     state.restaurant.step = "done";
     bellHasNote = true;
     saveState();
