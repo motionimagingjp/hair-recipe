@@ -909,7 +909,7 @@
       restaurantChat:{ started:false, log:[] },
       restaurant:{
         step:null, category:null, mealtime:null,
-        location:null, budgetLabel:null, budgetNote:null, extraNote:null
+        location:null, cuisine:null, budgetLabel:null, budgetNote:null, extraNote:null
       }
     };
     try{
@@ -2532,7 +2532,7 @@
     state.restaurantChat = { started:false, log:[] };
     state.restaurant = {
       step:null, category:null, mealtime:null,
-      location:null, budgetLabel:null, budgetNote:null, extraNote:null
+      location:null, cuisine:null, budgetLabel:null, budgetNote:null, extraNote:null
     };
     saveState();
   }
@@ -2574,7 +2574,7 @@
   }
 
   function proceedToRestaurantLocationStep(){
-    pushRestaurantLog({ type:"ai", text:"ありがとうございます！エリアを教えてください（駅名・エリア名・路線名など、わかる範囲でOKです）。下の入力欄からどうぞ。" });
+    pushRestaurantLog({ type:"ai", text:"ありがとうございます！エリアを教えてください（駅名・エリア名・路線名など、わかる範囲でOKです）。料理のジャンルも決まっていれば一緒にどうぞ（例：新宿のタイ料理）。下の入力欄からどうぞ。" });
     pushRestaurantLog({ type:"restaurant-location-prompt" });
     state.restaurant.step = "location";
     saveState();
@@ -2586,8 +2586,39 @@
   function onPickRestaurantLocation(location){
     pushRestaurantLog({ type:"user", text: location });
     state.restaurant.location = location;
+    state.restaurant.cuisine = null;
     saveState();
     proceedToRestaurantBudgetStep();
+  }
+
+  // 🔧 差し替えポイント：国名・料理ジャンルのキーワード。「川越 韓国」のように地名＋国名が
+  // 一緒に入力された場合、国名側を自動的に「〇〇料理」という料理ジャンルとして解釈する。
+  // 長い語を優先してマッチさせるため、キーは長さの降順で走査する（例："タイ料理"を"タイ"より先に判定）。
+  var CUISINE_KEYWORDS = {
+    "韓国料理":"韓国料理", "中華料理":"中華料理", "タイ料理":"タイ料理", "インド料理":"インド料理",
+    "インドネシア":"インドネシア料理", "シンガポール":"シンガポール料理", "フィリピン":"フィリピン料理",
+    "ネパール":"ネパール料理", "ベトナム":"ベトナム料理", "メキシコ":"メキシコ料理", "モロッコ":"モロッコ料理",
+    "レバノン":"レバノン料理", "ロシア":"ロシア料理", "ドイツ":"ドイツ料理", "スペイン":"スペイン料理",
+    "トルコ":"トルコ料理", "ギリシャ":"ギリシャ料理", "ブラジル":"ブラジル料理", "アメリカ":"アメリカ料理",
+    "ハワイ":"ハワイアン", "台湾":"台湾料理", "韓国":"韓国料理", "中国":"中華料理", "中華":"中華料理",
+    "タイ":"タイ料理", "インド":"インド料理", "イタリア":"イタリアン", "イタリアン":"イタリアン",
+    "フランス":"フレンチ", "フレンチ":"フレンチ", "エスニック":"エスニック料理",
+    "焼肉":"焼肉", "寿司":"寿司", "ラーメン":"ラーメン", "和食":"和食"
+  };
+  var CUISINE_KEYWORD_KEYS = Object.keys(CUISINE_KEYWORDS).sort(function(a,b){ return b.length - a.length; });
+
+  // 入力文字列から「料理ジャンル（国名含む）」と「残りのエリア部分」を切り分ける。
+  // マッチしなければ null を返す（＝これまで通り全文をエリアとして扱う）。
+  function detectRestaurantCuisine(text){
+    for(var i=0;i<CUISINE_KEYWORD_KEYS.length;i++){
+      var key = CUISINE_KEYWORD_KEYS[i];
+      var idx = text.indexOf(key);
+      if(idx !== -1){
+        var rest = (text.slice(0,idx) + text.slice(idx+key.length)).replace(/[の・、,，]+/g," ").trim();
+        return { cuisine: CUISINE_KEYWORDS[key], area: rest };
+      }
+    }
+    return null;
   }
 
   // カテゴリ／ランチ・ディナーに応じたデフォルト予算（🔧 差し替えポイント：相場が変わったら調整）
@@ -2631,7 +2662,31 @@
     pushRestaurantLog({ type:"user", text: text });
     var step = state.restaurant.step;
     if(step === "location"){
+      var detected = detectRestaurantCuisine(text);
+      if(detected && detected.area){
+        // 例：「川越 韓国」→ エリア「川越」＋料理ジャンル「韓国料理」と解釈して進める
+        state.restaurant.location = detected.area;
+        state.restaurant.cuisine = detected.cuisine;
+        saveState();
+        proceedToRestaurantBudgetStep();
+        return;
+      }
+      if(detected && !detected.area){
+        // 料理ジャンルらしき語はあるが、エリアが読み取れない（例：「韓国」だけ）
+        pushRestaurantLog({ type:"ai", text:"場所が読み取れませんでした。場所と料理名を一緒に入れてください（例：新宿のタイ料理）。" });
+        render();
+        return;
+      }
+      var locationTokens = text.split(/[\s、,，]+/).filter(Boolean);
+      if(locationTokens.length >= 2){
+        // 料理ジャンルが特定できないまま複数の語が入力された場合は、意図が読み取りにくいため確認する
+        pushRestaurantLog({ type:"ai", text:"うまく認識できませんでした。場所と料理名を入れてください（例：新宿のタイ料理）。" });
+        render();
+        return;
+      }
+      // 単語1つ（駅名・エリア名など）は、これまで通りエリアとして扱う
       state.restaurant.location = text;
+      state.restaurant.cuisine = null;
       saveState();
       proceedToRestaurantBudgetStep();
       return;
@@ -2691,6 +2746,7 @@
       category: r.category,
       mealtime: r.mealtime,
       location: r.location,
+      cuisine: r.cuisine,
       budgetLabel: r.budgetLabel,
       budgetNote: r.budgetNote,
       extraNote: r.extraNote
