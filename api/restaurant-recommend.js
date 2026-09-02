@@ -75,7 +75,8 @@ export default async function handler(req, res) {
       "・実在しないお店を創作しないでください。\n" +
       "・住所・営業時間・個室有無・喫煙可否などの事実情報は、確認が取れたものだけ断定してください。\n" +
       "・確認が取れない、または自信がない項目がある場合は、無理に断定せず該当お店の \"unverified\" を true にしてください。\n" +
-      '必ず次のJSON形式のみで回答してください（説明文やコードブロックは不要）:\n' +
+      "・条件に合う実在のお店が見つからない場合は、無理に別のエリアや料理ジャンルのお店を提案せず、spotsを空配列 [] にしてください。\n" +
+      '必ず次のJSON形式のみで回答してください（説明文・前置き・コードブロックの記号は一切付けないでください）:\n' +
       '{"spots":[{"name":"店名","area":"エリア","desc":"一言紹介（60文字程度）","dateTips":["デート視点のアドバイス","..."],"unverified":true または false}]}';
 
     // gemini-flash-latest は Google 側が常に「その時点で推奨されるFlashモデル」を指すように
@@ -90,6 +91,11 @@ export default async function handler(req, res) {
         // Google検索連携（grounding）。モデル/APIバージョンによっては未対応でエラーになるため、
         // 失敗時は下で一般知識ベースの呼び出しにフォールバックする。
         body.tools = [{ google_search: {} }];
+      } else {
+        // grounding（tools）とJSON強制モードは同時に指定できないため、
+        // 一般知識ベースの呼び出し時のみ厳密なJSON出力を強制する。
+        // これにより「該当店舗が少ないエリア／料理ジャンルで、説明文だけ返してJSON化に失敗する」事態を防ぐ。
+        body.generationConfig = { responseMimeType: "application/json" };
       }
       return fetch(apiUrl, {
         method: "POST",
@@ -98,47 +104,53 @@ export default async function handler(req, res) {
       });
     }
 
+    // Geminiのレスポンスから spots のJSONを取り出す。取れなければ null を返す
+    // （HTTPレベルでは成功していても、grounding利用時は説明文だけ返ってきてJSON化に
+    //  失敗することがあるため、その場合も「失敗」として扱いフォールバックできるようにする）。
+    function extractSpots(data) {
+      const parts = (data && data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts) || [];
+      const text = parts.map(function (p) { return p.text || ""; }).join("");
+      const match = text.match(/\{[\s\S]*\}/);
+      if (!match) return { error: "Could not parse Gemini response", raw: text };
+      let parsed;
+      try {
+        parsed = JSON.parse(match[0]);
+      } catch (e) {
+        return { error: "Invalid JSON from Gemini", raw: text };
+      }
+      if (!parsed || !Array.isArray(parsed.spots)) {
+        return { error: "Unexpected response shape", raw: parsed };
+      }
+      return { spots: parsed.spots };
+    }
+
     let geminiRes = await callGemini(true);
     let usedGrounding = geminiRes.ok;
+    let data = geminiRes.ok ? await geminiRes.json() : null;
+    let extracted = data ? extractSpots(data) : null;
 
-    if (!geminiRes.ok) {
-      // grounding非対応などで失敗した場合は、一般知識ベースで再試行する
+    if (!geminiRes.ok || !extracted || extracted.error) {
+      // grounding非対応、またはgrounding利用時にJSON化できる形式で返ってこなかった場合は、
+      // JSON出力を強制した一般知識ベースの呼び出しで再試行する。
       geminiRes = await callGemini(false);
       usedGrounding = false;
+      if (!geminiRes.ok) {
+        const errText = await geminiRes.text();
+        res.status(502).json({ error: "Gemini API error", detail: errText });
+        return;
+      }
+      data = await geminiRes.json();
+      extracted = extractSpots(data);
+      if (!extracted || extracted.error) {
+        res.status(502).json({ error: (extracted && extracted.error) || "Could not parse Gemini response", raw: extracted && extracted.raw });
+        return;
+      }
     }
-
-    if (!geminiRes.ok) {
-      const errText = await geminiRes.text();
-      res.status(502).json({ error: "Gemini API error", detail: errText });
-      return;
-    }
-
-    const data = await geminiRes.json();
 
     // grounding利用時、実際に検索結果を参照できたかを groundingMetadata の有無で確認する
     const groundingMeta = data && data.candidates && data.candidates[0] && data.candidates[0].groundingMetadata;
     const actuallyGrounded = !!(usedGrounding && groundingMeta && groundingMeta.groundingChunks && groundingMeta.groundingChunks.length);
-
-    const parts = (data && data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts) || [];
-    const text = parts.map(function (p) { return p.text || ""; }).join("");
-    const match = text.match(/\{[\s\S]*\}/);
-    if (!match) {
-      res.status(502).json({ error: "Could not parse Gemini response", raw: text });
-      return;
-    }
-
-    let parsed;
-    try {
-      parsed = JSON.parse(match[0]);
-    } catch (e) {
-      res.status(502).json({ error: "Invalid JSON from Gemini", raw: text });
-      return;
-    }
-
-    if (!parsed || !Array.isArray(parsed.spots)) {
-      res.status(502).json({ error: "Unexpected response shape", raw: parsed });
-      return;
-    }
+    const parsed = { spots: extracted.spots };
 
     res.status(200).json({
       spots: parsed.spots.slice(0, 5).map(function (s) {
